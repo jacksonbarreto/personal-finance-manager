@@ -1,6 +1,9 @@
-package model;
+package bll.valueObjects;
 
-import Exception.invalidEmailFormatException;
+import bll.exceptions.invalidEmailFormatException;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Interface {@code IEmail} represents an email address entity.
@@ -9,8 +12,7 @@ import Exception.invalidEmailFormatException;
  * in accordance with RFC2822 and RFC1035.
  */
 public interface IEmail {
-    String REGEX_EMAIL_FORMAT =
-            "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])";
+    Pattern REGEX_EMAIL_FORMAT = Pattern.compile("(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])", Pattern.CASE_INSENSITIVE);
 
     /**
      * Returns the local part of the email address.
@@ -105,6 +107,7 @@ public interface IEmail {
      * @return {@code true} if the email address follows the standards of RFC2822 and RFC1035.
      */
     static boolean isPlainTextEmailValid(String email) {
-        return email.matches(REGEX_EMAIL_FORMAT);
+        Matcher matcher = REGEX_EMAIL_FORMAT.matcher(email);
+        return  matcher.find();
     }
 }
