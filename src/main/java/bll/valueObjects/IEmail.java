@@ -1,7 +1,5 @@
 package bll.valueObjects;
 
-import bll.exceptions.invalidEmailFormatException;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -49,26 +47,6 @@ public interface IEmail {
     boolean isAuthorizedAdvertisingContact();
 
     /**
-     * Change the permission to send advertising emails.
-     *
-     * @param newCondition {@code true} to authorize receipt or {@code false} to deny receipt.
-     */
-    void updateAuthorizedAdvertisingContact(boolean newCondition);
-
-    /**
-     * Change the email address.
-     * An email address, complete and in plain text, follows the following format:
-     * <blockquote>
-     * <pre>
-     *         "localPart@domainName"
-     *     </pre></blockquote>
-     *
-     * @param newEmail new email address, complete, in plain text.
-     * @throws invalidEmailFormatException if the email address does not meet the standards of RFC2822 and RFC1035.
-     */
-    void updateEmail(String newEmail);
-
-    /**
      * Indicates whether some other IEmail is "equal to" this one.
      * This method evaluates whether localPart and DomainPart are the same.
      *
@@ -108,6 +86,6 @@ public interface IEmail {
      */
     static boolean isPlainTextEmailValid(String email) {
         Matcher matcher = REGEX_EMAIL_FORMAT.matcher(email);
-        return  matcher.find();
+        return matcher.find();
     }
 }
