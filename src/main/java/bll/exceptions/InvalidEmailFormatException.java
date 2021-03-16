@@ -5,8 +5,8 @@ package bll.exceptions;
  * used as a parameter for the {@code IEmail} interface does not fall under
  * the guidelines of RFC2822 and RFC1035.
  */
-public class invalidEmailFormatException extends IllegalArgumentException {
-    public invalidEmailFormatException() {
+public class InvalidEmailFormatException extends IllegalArgumentException {
+    public InvalidEmailFormatException() {
         super();
     }
 }
