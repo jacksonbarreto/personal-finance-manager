@@ -56,14 +56,6 @@ public interface IEmail {
      */
     boolean equals(Object obj);
 
-
-    /**
-     * Creates and returns a copy of this object.
-     *
-     * @return a clone of this instance.
-     */
-    IEmail clone();
-
     /**
      * Returns a string representation of the email object.
      *
