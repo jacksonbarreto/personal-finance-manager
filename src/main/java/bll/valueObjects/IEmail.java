@@ -48,21 +48,14 @@ public interface IEmail {
 
     /**
      * Indicates whether some other IEmail is "equal to" this one.
-     * This method evaluates whether localPart and DomainPart are the same.
+     * This is a valuable object, so it is immutable.
+     * It is only the same when both objects have all their attributes equal.
      *
      * @param email an instance of IEmail.
-     * @return {@code true} if this object is the same as the obj
+     * @return {@code true} if only the same when both objects have all their attributes equal.
      */
     boolean equals(IEmail email);
 
-    /**
-     * Indicates whether some other IEmail is "equal to" this one.
-     * This method checks whether all attributes are in the same state on both objects.
-     *
-     * @param email an instance of IEmail.
-     * @return {@code true} if this object is the same as the obj
-     */
-    boolean isDeepEqual(IEmail email);
 
     /**
      * Creates and returns a copy of this object.
