@@ -51,10 +51,10 @@ public interface IEmail {
      * This is a valuable object, so it is immutable.
      * It is only the same when both objects have all their attributes equal.
      *
-     * @param email an instance of IEmail.
+     * @param obj an instance of IEmail.
      * @return {@code true} if only the same when both objects have all their attributes equal.
      */
-    boolean equals(IEmail email);
+    boolean equals(Object obj);
 
 
     /**
