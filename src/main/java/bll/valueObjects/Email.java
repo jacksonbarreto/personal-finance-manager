@@ -13,7 +13,7 @@ public class Email implements IEmail {
     private final boolean AdvertisingContact;
 
     public Email(String email, boolean advertisingContact) {
-        if (!IEmail.isPlainTextEmailValid(email))
+        if (IEmail.isPlainTextEmailInvalid(email))
             throw new InvalidEmailFormatException();
         String[] parts = email.split(SEPARATOR);
         this.localPart = parts[0];
