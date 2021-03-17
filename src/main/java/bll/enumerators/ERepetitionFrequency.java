@@ -9,7 +9,7 @@ public enum ERepetitionFrequency implements Serializable {
     QUARTERLY(4),
     YEARLY(5);
 
-    private int ID;
+    private final int ID;
 
     ERepetitionFrequency(int ID) {
         this.ID = ID;
