@@ -46,7 +46,6 @@ public interface IPayee extends Serializable {
      */
     String toString();
 
-    boolean isDeepEqual();
 
     /**
      * Indicates whether some other IPayee is "equal to" this one.
