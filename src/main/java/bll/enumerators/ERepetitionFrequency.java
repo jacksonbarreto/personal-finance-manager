@@ -7,7 +7,8 @@ public enum ERepetitionFrequency implements Serializable {
     FORTNIGHTLY(2),
     MONTHLY(3),
     QUARTERLY(4),
-    YEARLY(5);
+    YEARLY(5),
+    NONE(6);
 
     private final int ID;
 
