@@ -2,16 +2,17 @@ package valueObjects;
 
 import bll.exceptions.InvalidEmailFormatException;
 import bll.valueObjects.Email;
+import bll.valueObjects.IEmail;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class EmailTest {
-    Email email1 = new Email("jacksonjunior@ipvc.pt");
-    Email email2 = new Email("jacksonjunior@ipvc.pt");
-    Email email3 = new Email("jacksonjunior@ipvc.pt", true);
-    Email email4 = new Email("jacksonjunior@ipvc.pt", false);
-    Email email5 = new Email("leonadolopez@gmail.com");
+    IEmail email1 = new Email("jacksonjunior@ipvc.pt");
+    IEmail email2 = new Email("jacksonjunior@ipvc.pt");
+    IEmail email3 = new Email("jacksonjunior@ipvc.pt", true);
+    IEmail email4 = new Email("jacksonjunior@ipvc.pt", false);
+    IEmail email5 = new Email("leonadolopez@gmail.com");
 
     @Test
     public void ShouldThrowExceptionWithInvalidEmail() {
