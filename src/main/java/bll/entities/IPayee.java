@@ -3,6 +3,7 @@ package bll.entities;
 import java.io.Serializable;
 
 import bll.exceptions.InvalidNameSizeException;
+import bll.exceptions.NullArgumentException;
 
 public interface IPayee extends Serializable {
 
@@ -23,6 +24,7 @@ public interface IPayee extends Serializable {
      * @throws InvalidNameSizeException if the size of the name attribute
      *                                  does not correspond to the minimum and / or maximum limits
      *                                  defined in an MINIMUM_NAME_SIZE and MAXIMUM_NAME_SIZE.
+     * @throws NullArgumentException    if the argument is null.
      */
     void updateName(String newName);
 
@@ -30,6 +32,10 @@ public interface IPayee extends Serializable {
      * Returns the unique identifier of the payee.
      *
      * @return the unique identifier of the payee.
+     * @throws InvalidNameSizeException if the size of the name attribute
+     *                                  does not correspond to the minimum and / or maximum limits
+     *                                  defined in an MINIMUM_NAME_SIZE and MAXIMUM_NAME_SIZE.
+     * @throws NullArgumentException    if the argument is null.
      */
     String getID();
 
