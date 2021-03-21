@@ -2,7 +2,7 @@ package bll.enumerators;
 
 import java.io.Serializable;
 
-public enum ERemovalMode implements Serializable {
+public enum EHandlingMode implements Serializable {
     ALL(1),
     JUST_THIS_ONE(2),
     THIS_AND_NEXT(3),
@@ -12,7 +12,7 @@ public enum ERemovalMode implements Serializable {
 
     private final int ID;
 
-    ERemovalMode(int ID) {
+    EHandlingMode(int ID) {
         this.ID = ID;
     }
 
