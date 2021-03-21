@@ -3,6 +3,7 @@ package bll.valueObjects;
 import java.util.Objects;
 
 import bll.exceptions.InvalidEmailFormatException;
+import bll.exceptions.NullArgumentException;
 
 /**
  * Implementation of the {@code IEmail} interface.
@@ -13,6 +14,8 @@ public class Email implements IEmail {
     private final boolean AdvertisingContact;
 
     public Email(String email, boolean advertisingContact) {
+        if (email == null)
+            throw new NullArgumentException();
         if (IEmail.isPlainTextEmailInvalid(email))
             throw new InvalidEmailFormatException();
         String[] parts = email.split(SEPARATOR);
