@@ -1,6 +1,7 @@
 package valueObjects;
 
 import bll.exceptions.InvalidEmailFormatException;
+import bll.exceptions.NullArgumentException;
 import bll.valueObjects.Email;
 import bll.valueObjects.IEmail;
 import org.junit.jupiter.api.Test;
@@ -26,7 +27,7 @@ public class EmailTest {
 
     @Test
     public void ShouldThrowExceptionWithNullEmail() {
-        assertThrows(InvalidEmailFormatException.class, () -> new Email(null));
+        assertThrows(NullArgumentException.class, () -> new Email(null));
     }
 
     @Test
