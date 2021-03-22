@@ -90,4 +90,11 @@ public interface IPayee extends Serializable {
      * Activates the payee.
      */
     void activate();
+
+    /**
+     * Returns a clone of the current object.
+     *
+     * @return a clone of the current instance.
+     */
+    public IPayee clone();
 }
