@@ -1,6 +1,8 @@
 package bll.entities;
 
 import java.io.Serializable;
+import java.util.UUID;
+import java.util.function.Predicate;
 
 import bll.exceptions.InvalidNameSizeException;
 import bll.exceptions.NullArgumentException;
@@ -9,6 +11,7 @@ public interface IPayee extends Serializable {
 
     int MINIMUM_NAME_SIZE = 3;
     int MAXIMUM_NAME_SIZE = 30;
+    Predicate<String> INVALID_NAME_SIZE = s -> s.length() < MINIMUM_NAME_SIZE || s.length() > MAXIMUM_NAME_SIZE;
 
     /**
      * Returns the name of the payee.
@@ -28,16 +31,13 @@ public interface IPayee extends Serializable {
      */
     void updateName(String newName);
 
+
     /**
      * Returns the unique identifier of the payee.
      *
      * @return the unique identifier of the payee.
-     * @throws InvalidNameSizeException if the size of the name attribute
-     *                                  does not correspond to the minimum and / or maximum limits
-     *                                  defined in an MINIMUM_NAME_SIZE and MAXIMUM_NAME_SIZE.
-     * @throws NullArgumentException    if the argument is null.
      */
-    String getID();
+    UUID getUUID();
 
     /**
      * Returns a string representation of the payee object.
