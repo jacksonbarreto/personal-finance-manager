@@ -96,5 +96,5 @@ public interface IPayee extends Serializable {
      *
      * @return a clone of the current instance.
      */
-    public IPayee clone();
+    IPayee clone();
 }
