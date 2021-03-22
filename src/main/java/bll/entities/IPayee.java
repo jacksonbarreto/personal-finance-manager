@@ -37,7 +37,7 @@ public interface IPayee extends Serializable {
      *
      * @return the unique identifier of the payee.
      */
-    UUID getUUID();
+    UUID getID();
 
     /**
      * Returns a string representation of the payee object.
