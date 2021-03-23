@@ -9,9 +9,9 @@ import bll.exceptions.NullArgumentException;
  * Implementation of the {@code IEmail} interface.
  */
 final public class Email implements IEmail {
-    private final String localPart;
-    private final String domainName;
-    private final boolean AdvertisingContact;
+    private String localPart;
+    private String domainName;
+    private boolean AdvertisingContact;
 
     public Email(String email, boolean advertisingContact) {
         if (email == null)
@@ -70,5 +70,24 @@ final public class Email implements IEmail {
                 ", domainName='" + domainName + '\'' +
                 ", AdvertisingContact=" + AdvertisingContact +
                 '}';
+    }
+
+    private Email() {
+    }
+
+    private void setLocalPart(String localPart) {
+        this.localPart = localPart;
+    }
+
+    private void setDomainName(String domainName) {
+        this.domainName = domainName;
+    }
+
+    private boolean isAdvertisingContact() {
+        return AdvertisingContact;
+    }
+
+    private void setAdvertisingContact(boolean advertisingContact) {
+        AdvertisingContact = advertisingContact;
     }
 }
