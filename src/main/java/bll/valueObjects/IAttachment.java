@@ -17,4 +17,10 @@ public interface IAttachment extends Serializable {
      */
     String getURI();
 
+    /**
+     * Returns a string representation of the Category object.
+     *
+     * @return a string representation of the Category object.
+     */
+    String toString();
 }
