@@ -135,6 +135,9 @@ public class Payee implements IPayee {
         return new Payee(this);
     }
 
+    private Payee() {
+        
+    }
 
     private void setId(UUID id) {
         this.id = id;
