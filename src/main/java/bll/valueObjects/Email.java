@@ -8,7 +8,7 @@ import bll.exceptions.NullArgumentException;
 /**
  * Implementation of the {@code IEmail} interface.
  */
-public class Email implements IEmail {
+final public class Email implements IEmail {
     private final String localPart;
     private final String domainName;
     private final boolean AdvertisingContact;
