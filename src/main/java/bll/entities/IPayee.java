@@ -58,7 +58,7 @@ public interface IPayee extends Serializable {
     boolean equals(Object obj);
 
     /**
-     * Indicates whether some other IEmail is "equal to" this one.
+     * Indicates whether some other IPayee is "equal to" this one.
      * <p>
      * It is only the same when both objects have all their attributes equal.
      *
