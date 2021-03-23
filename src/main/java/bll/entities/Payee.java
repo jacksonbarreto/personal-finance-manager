@@ -136,7 +136,11 @@ public class Payee implements IPayee {
     }
 
     private Payee() {
-        
+
+    }
+
+    private UUID getId() {
+        return id;
     }
 
     private void setId(UUID id) {
