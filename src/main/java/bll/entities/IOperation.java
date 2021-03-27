@@ -12,7 +12,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 
-public interface IOperation extends Serializable {
+public interface IOperation extends Serializable, Comparable<IOperation> {
     int MINIMUM_NAME_SIZE = 3;
     int MAXIMUM_NAME_SIZE = 30;
     int MINIMUM_DESCRIPTION_SIZE = 3;
