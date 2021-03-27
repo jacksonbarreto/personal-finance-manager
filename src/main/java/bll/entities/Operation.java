@@ -39,7 +39,8 @@ public abstract class Operation implements IOperation {
         this.formOfPayment = formOfPayment;
         this.payee = payee;
         this.category = category;
-        this.attachments = attachments;
+        this.attachments = new HashSet<>();
+        this.attachments.addAll(attachments);
         this.ID = UUID.randomUUID();
     }
 
