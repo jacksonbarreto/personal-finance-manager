@@ -135,22 +135,27 @@ public class Payee implements IPayee {
         return new Payee(this);
     }
 
+    @SuppressWarnings("unused")
     private Payee() {
 
     }
 
+    @SuppressWarnings("unused")
     private UUID getId() {
         return id;
     }
 
+    @SuppressWarnings("unused")
     private void setId(UUID id) {
         this.id = id;
     }
 
+    @SuppressWarnings("unused")
     private void setName(String name) {
         this.name = name;
     }
 
+    @SuppressWarnings("unused")
     private void setActive(boolean active) {
         this.active = active;
     }
