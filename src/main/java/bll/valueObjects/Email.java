@@ -72,21 +72,22 @@ final public class Email implements IEmail {
                 '}';
     }
 
+    @SuppressWarnings("unused")
     private Email() {
     }
-
+    @SuppressWarnings("unused")
     private void setLocalPart(String localPart) {
         this.localPart = localPart;
     }
-
+    @SuppressWarnings("unused")
     private void setDomainName(String domainName) {
         this.domainName = domainName;
     }
-
+    @SuppressWarnings("unused")
     private boolean isAdvertisingContact() {
         return AdvertisingContact;
     }
-
+    @SuppressWarnings("unused")
     private void setAdvertisingContact(boolean advertisingContact) {
         AdvertisingContact = advertisingContact;
     }
