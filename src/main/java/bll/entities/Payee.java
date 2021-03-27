@@ -15,9 +15,9 @@ public class Payee implements IPayee {
     public Payee(String name, boolean active) {
         if (name == null)
             throw new NullArgumentException();
-        if (INCORRECT_NAME_SIZE.test(name))
+        if (INCORRECT_NAME_SIZE.test(name.trim()))
             throw new InvalidNameSizeException();
-        this.name = name;
+        this.name = name.trim();
         this.active = active;
         this.id = UUID.randomUUID();
     }
@@ -57,9 +57,9 @@ public class Payee implements IPayee {
     public void updateName(String newName) {
         if (newName == null)
             throw new NullArgumentException();
-        if (INCORRECT_NAME_SIZE.test(newName))
+        if (INCORRECT_NAME_SIZE.test(newName.trim()))
             throw new InvalidNameSizeException();
-        this.name = newName;
+        this.name = newName.trim();
     }
 
     /**
