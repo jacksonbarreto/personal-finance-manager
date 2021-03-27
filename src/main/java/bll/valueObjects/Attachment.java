@@ -1,20 +1,20 @@
 package bll.valueObjects;
 
 import bll.exceptions.EmptyArgumentException;
+import bll.exceptions.NullArgumentException;
 
 import java.util.Objects;
-
-import static bll.entities.Utilities.isNullArgument;
 
 final public class Attachment implements IAttachment {
 
     private String URI;
 
     public Attachment(String URI) {
-        isNullArgument(URI);
-        if (URI.isEmpty())
+        if (URI == null)
+            throw new NullArgumentException();
+        if (URI.trim().isEmpty())
             throw new EmptyArgumentException();
-        this.URI = URI;
+        this.URI = URI.trim();
     }
 
     /**
@@ -40,17 +40,21 @@ final public class Attachment implements IAttachment {
         return Objects.hash(URI);
     }
 
-    private void setURI(String URI) {
-        this.URI = URI;
-    }
-
-    private Attachment() {
-    }
-
     @Override
     public String toString() {
         return "Attachment{" +
                 "URI='" + URI + '\'' +
                 '}';
     }
+
+    @SuppressWarnings("unused")
+    private void setURI(String URI) {
+        this.URI = URI;
+    }
+
+    @SuppressWarnings("unused")
+    private Attachment() {
+    }
+
+
 }
