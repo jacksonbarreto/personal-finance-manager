@@ -144,22 +144,22 @@ public class FormOfPayment implements IFormOfPayment {
     public IFormOfPayment clone() {
         return new FormOfPayment(this);
     }
-
+    @SuppressWarnings("unused")
     private FormOfPayment() {
     }
-
+    @SuppressWarnings("unused")
     private UUID getId() {
         return id;
     }
-
+    @SuppressWarnings("unused")
     private void setId(UUID id) {
         this.id = id;
     }
-
+    @SuppressWarnings("unused")
     private void setName(String name) {
         this.name = name;
     }
-
+    @SuppressWarnings("unused")
     private void setActive(boolean active) {
         this.active = active;
     }
