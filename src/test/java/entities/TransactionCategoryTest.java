@@ -91,11 +91,11 @@ public class TransactionCategoryTest {
 
     @Test
     public void theImgURIShouldBeCorrect() {
-        assertNull(t1.getImgURI());
+        assertEquals("", t1.getImgURI());
         assertEquals("/rest.png", t2.getImgURI());
         assertEquals("./assets/tax.png", t5.getImgURI());
-        assertNull(t3.getImgURI());
-        assertNull(t4.getImgURI());
+        assertEquals("", t3.getImgURI());
+        assertEquals("", t4.getImgURI());
     }
 
     @Test
