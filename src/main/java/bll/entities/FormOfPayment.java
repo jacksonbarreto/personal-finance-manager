@@ -1,13 +1,10 @@
 package bll.entities;
 
-import java.util.Objects;
-import java.util.UUID;
-
-import static bll.entities.Utilities.isInvalidName;
-import static bll.entities.Utilities.isNullArgument;
-
 import bll.exceptions.InvalidNameSizeException;
 import bll.exceptions.NullArgumentException;
+
+import java.util.Objects;
+import java.util.UUID;
 
 public class FormOfPayment implements IFormOfPayment {
     private UUID id;
@@ -15,21 +12,22 @@ public class FormOfPayment implements IFormOfPayment {
     private boolean active;
 
     public FormOfPayment(String name, boolean active) {
-        isInvalidName(name, MINIMUM_NAME_SIZE, MAXIMUM_NAME_SIZE);
-        this.name = name;
+        if (name == null)
+            throw new NullArgumentException();
+        if (INCORRECT_NAME_SIZE.test(name.trim()))
+            throw new InvalidNameSizeException();
+        this.name = name.trim();
         this.active = active;
         this.id = UUID.randomUUID();
     }
 
     public FormOfPayment(String name) {
-        isInvalidName(name, MINIMUM_NAME_SIZE, MAXIMUM_NAME_SIZE);
-        this.name = name;
-        this.active = true;
-        this.id = UUID.randomUUID();
+        this(name, true);
     }
 
     public FormOfPayment(IFormOfPayment formOfPayment) {
-        isNullArgument(formOfPayment);
+        if (formOfPayment == null)
+            throw new NullArgumentException();
         this.name = formOfPayment.getName();
         this.active = formOfPayment.isActive();
         this.id = formOfPayment.getID();
@@ -66,8 +64,11 @@ public class FormOfPayment implements IFormOfPayment {
      */
     @Override
     public void updateName(String newName) {
-        isInvalidName(newName, MINIMUM_NAME_SIZE, MAXIMUM_NAME_SIZE);
-        this.name = newName;
+        if (newName == null)
+            throw new NullArgumentException();
+        if (INCORRECT_NAME_SIZE.test(newName.trim()))
+            throw new InvalidNameSizeException();
+        this.name = newName.trim();
     }
 
     /**
@@ -144,21 +145,26 @@ public class FormOfPayment implements IFormOfPayment {
     public IFormOfPayment clone() {
         return new FormOfPayment(this);
     }
+
     @SuppressWarnings("unused")
     private FormOfPayment() {
     }
+
     @SuppressWarnings("unused")
     private UUID getId() {
         return id;
     }
+
     @SuppressWarnings("unused")
     private void setId(UUID id) {
         this.id = id;
     }
+
     @SuppressWarnings("unused")
     private void setName(String name) {
         this.name = name;
     }
+
     @SuppressWarnings("unused")
     private void setActive(boolean active) {
         this.active = active;
