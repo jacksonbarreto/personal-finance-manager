@@ -1,13 +1,10 @@
 package bll.entities;
 
-import java.util.Objects;
-import java.util.UUID;
-
 import bll.exceptions.InvalidNameSizeException;
 import bll.exceptions.NullArgumentException;
 
-import static bll.entities.Utilities.*;
-import static bll.entities.Utilities.isNullArgument;
+import java.util.Objects;
+import java.util.UUID;
 
 public class TransactionCategory implements ITransactionCategory {
 
@@ -17,32 +14,27 @@ public class TransactionCategory implements ITransactionCategory {
     private boolean active;
 
     public TransactionCategory(String name, String imgURI, boolean active) {
-        isNullArgument(imgURI);
-        isInvalidName(name, MINIMUM_NAME_SIZE, MAXIMUM_NAME_SIZE);
-        this.name = name;
-        this.imgURI = imgURI;
+        if (name == null || imgURI == null)
+            throw new NullArgumentException();
+        if (INCORRECT_NAME_SIZE.test(name.trim()))
+            throw new InvalidNameSizeException();
+        this.name = name.trim();
+        this.imgURI = imgURI.trim();
         this.active = active;
         this.id = UUID.randomUUID();
     }
 
     public TransactionCategory(String name, String imgURI) {
-        isNullArgument(imgURI);
-        isInvalidName(name, MINIMUM_NAME_SIZE, MAXIMUM_NAME_SIZE);
-        this.name = name;
-        this.imgURI = imgURI;
-        this.active = true;
-        this.id = UUID.randomUUID();
+        this(name, imgURI, true);
     }
 
     public TransactionCategory(String name) {
-        isInvalidName(name, MINIMUM_NAME_SIZE, MAXIMUM_NAME_SIZE);
-        this.name = name;
-        this.active = true;
-        this.id = UUID.randomUUID();
+        this(name, "", true);
     }
 
     public TransactionCategory(ITransactionCategory transactionCategory) {
-        isNullArgument(transactionCategory);
+        if (transactionCategory == null)
+            throw new NullArgumentException();
         this.name = transactionCategory.getName();
         this.active = transactionCategory.isActive();
         this.id = transactionCategory.getID();
@@ -80,8 +72,11 @@ public class TransactionCategory implements ITransactionCategory {
      */
     @Override
     public void updateName(String newName) {
-        isInvalidName(newName, MINIMUM_NAME_SIZE, MAXIMUM_NAME_SIZE);
-        this.name = newName;
+        if (newName == null)
+            throw new NullArgumentException();
+        if (INCORRECT_NAME_SIZE.test(newName.trim()))
+            throw new InvalidNameSizeException();
+        this.name = newName.trim();
     }
 
     /**
@@ -101,8 +96,9 @@ public class TransactionCategory implements ITransactionCategory {
      */
     @Override
     public void updateImgURI(String newURI) {
-        isNullArgument(newURI);
-        this.imgURI = newURI;
+        if (newURI == null)
+            throw new NullArgumentException();
+        this.imgURI = newURI.trim();
     }
 
     /**
