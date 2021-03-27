@@ -23,9 +23,9 @@ public interface IOperation extends Serializable {
     Predicate<String> INCORRECT_DESCRIPTION_SIZE = (s) -> !s.isEmpty() && (s.length() < MINIMUM_DESCRIPTION_SIZE || s.length() > MAXIMUM_DESCRIPTION_SIZE);
 
     /**
-     * Returns the unique identifier of the Movement.
+     * Returns the unique identifier of the Operation.
      *
-     * @return the unique identifier of the Movement.
+     * @return the unique identifier of the Operation.
      */
     UUID getID();
 
@@ -37,58 +37,58 @@ public interface IOperation extends Serializable {
     String getName();
 
     /**
-     * Returns the monetary value of the movement.
+     * Returns the monetary value of the Operation.
      *
-     * @return the monetary value of the movement.
+     * @return the monetary value of the Operation.
      */
     BigDecimal getAmount();
 
     /**
-     * Returns the due date of the movement.
+     * Returns the due date of the Operation.
      *
-     * @return the due date of the movement.
+     * @return the due date of the Operation.
      */
     LocalDate getDueDate();
 
     /**
-     * Returns the reference (month / year) of the movement.
+     * Returns the reference (month / year) of the Operation.
      *
-     * @return the reference (month / year) of the movement.
+     * @return the reference (month / year) of the Operation.
      */
     YearMonth getReference();
 
     /**
-     * Returns the description of the movement.
+     * Returns the description of the Operation.
      *
-     * @return the description of the movement OR null if the operation has no description..
+     * @return the description of the Operation OR null if the operation has no description..
      */
     String getDescription();
 
     /**
-     * Returns the payee of the movement.
+     * Returns the payee of the Operation.
      *
-     * @return the payee of the movement.
+     * @return the payee of the Operation.
      */
     IPayee getPayee();
 
     /**
-     * Returns the category of the movement.
+     * Returns the category of the Operation.
      *
-     * @return the category of the movement.
+     * @return the category of the Operation.
      */
     ITransactionCategory getCategory();
 
     /**
-     * Returns the payment method of the transaction.
+     * Returns the payment method of the Operation.
      *
-     * @return the payment method of the transaction.
+     * @return the payment method of the Operation.
      */
     IFormOfPayment getFormOfPayment();
 
     /**
-     * Returns a collection of movement attachments.
+     * Returns a collection of Operation attachments.
      *
-     * @return a collection of movement attachments.
+     * @return a collection of Operation attachments.
      */
     Set<IAttachment> getAttachments();
 
