@@ -176,26 +176,27 @@ public class TransactionCategory implements ITransactionCategory {
         return new TransactionCategory(this);
     }
 
+    @SuppressWarnings("unused")
     private TransactionCategory() {
 
     }
-
+    @SuppressWarnings("unused")
     private void setName(String name) {
         this.name = name;
     }
-
+    @SuppressWarnings("unused")
     private void setImgURI(String imgURI) {
         this.imgURI = imgURI;
     }
-
+    @SuppressWarnings("unused")
     private UUID getId() {
         return id;
     }
-
+    @SuppressWarnings("unused")
     private void setId(UUID id) {
         this.id = id;
     }
-
+    @SuppressWarnings("unused")
     private void setActive(boolean active) {
         this.active = active;
     }
