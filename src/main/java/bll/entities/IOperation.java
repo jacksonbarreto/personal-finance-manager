@@ -60,7 +60,7 @@ public interface IOperation extends Serializable {
     /**
      * Returns the description of the Operation.
      *
-     * @return the description of the Operation OR null if the operation has no description..
+     * @return the description of the Operation.
      */
     String getDescription();
 
