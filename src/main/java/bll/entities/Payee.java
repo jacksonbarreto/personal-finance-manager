@@ -6,7 +6,6 @@ import bll.exceptions.NullArgumentException;
 import java.util.Objects;
 import java.util.UUID;
 
-import static bll.entities.Utilities.*;
 
 public class Payee implements IPayee {
     private UUID id;
@@ -14,7 +13,10 @@ public class Payee implements IPayee {
     private boolean active;
 
     public Payee(String name, boolean active) {
-        isInvalidName(name, MINIMUM_NAME_SIZE, MAXIMUM_NAME_SIZE);
+        if (name == null)
+            throw new NullArgumentException();
+        if (INCORRECT_NAME_SIZE.test(name))
+            throw new InvalidNameSizeException();
         this.name = name;
         this.active = active;
         this.id = UUID.randomUUID();
@@ -25,7 +27,8 @@ public class Payee implements IPayee {
     }
 
     public Payee(IPayee payee) {
-        isNullArgument(payee);
+        if (payee == null)
+            throw new NullArgumentException();
         this.id = payee.getID();
         this.name = payee.getName();
         this.active = payee.isActive();
@@ -52,7 +55,10 @@ public class Payee implements IPayee {
      */
     @Override
     public void updateName(String newName) {
-        isInvalidName(newName, MINIMUM_NAME_SIZE, MAXIMUM_NAME_SIZE);
+        if (newName == null)
+            throw new NullArgumentException();
+        if (INCORRECT_NAME_SIZE.test(newName))
+            throw new InvalidNameSizeException();
         this.name = newName;
     }
 
