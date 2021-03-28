@@ -9,8 +9,9 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.YearMonth;
-import java.util.UUID;
+import java.util.*;
 
+import static bll.entities.IOperation.COMPARE_FOR_AMOUNT;
 import static bll.enumerators.EOperationType.CREDIT;
 import static bll.enumerators.EOperationType.DEBIT;
 import static bll.enumerators.ERepetitionFrequency.*;
@@ -263,12 +264,37 @@ public class MovementTest {
     }
 
     @Test
-    void shouldReturnAReferenceCorrectly() {
+    public void shouldReturnAReferenceCorrectly() {
         YearMonth yearMonth = YearMonth.of(LocalDate.now().getYear(), LocalDate.now().getMonth());
         YearMonth yearMonth2 = YearMonth.of(1970, Month.JANUARY);
         LocalDate date = LocalDate.of(1970, Month.JANUARY, 1);
         assertEquals(yearMonth, obj1.getReference());
         obj2.updateDueDate(date);
         assertEquals(yearMonth2, obj2.getReference());
+    }
+
+    @Test
+    public void shouldSortByDateCorrectly(){
+        LocalDate date = LocalDate.of(1970, Month.JANUARY, 1);
+        obj2.updateDueDate(date);
+        List<IMovement> movements = new ArrayList<>();
+        movements.add(obj1);
+        movements.add(obj2);
+        assertEquals(obj1, movements.get(0));
+        Collections.sort(movements);
+        assertEquals(obj2, movements.get(0));
+    }
+
+    @Test
+    public void shouldSortByAmountCorrectly(){
+        LocalDate date = LocalDate.of(1970, Month.JANUARY, 1);
+        obj2.updateDueDate(date);
+        obj1.updateMovementType(DEBIT);
+        List<IMovement> movements = new ArrayList<>();
+        movements.add(obj2);
+        movements.add(obj1);
+        assertEquals(obj2, movements.get(0));
+        movements.sort(COMPARE_FOR_AMOUNT);
+        assertEquals(obj1, movements.get(0));
     }
 }
