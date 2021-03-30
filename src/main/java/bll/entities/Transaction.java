@@ -33,7 +33,7 @@ final public class Transaction extends Operation implements ITransaction {
         super(name, EMPTY_DESCRIPTION, amount, dueDate, formOfPayment, payee, category, new HashSet<>());
     }
 
-    public Transaction(ITransaction transaction) {
+    public Transaction(IOperation transaction) {
         if (transaction == null)
             throw new NullArgumentException();
 
