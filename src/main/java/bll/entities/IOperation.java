@@ -13,7 +13,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 
-public interface IOperation extends Serializable, Comparable<IOperation> {
+public interface IOperation extends Serializable, Comparable<IOperation>, Cloneable {
     int MINIMUM_NAME_SIZE = 3;
     int MAXIMUM_NAME_SIZE = 30;
     int MINIMUM_DESCRIPTION_SIZE = 3;
@@ -22,7 +22,7 @@ public interface IOperation extends Serializable, Comparable<IOperation> {
     Predicate<BigDecimal> AMOUNT_IS_ZERO = (amount) -> amount.equals(BigDecimal.ZERO);
     Predicate<String> INCORRECT_NAME_SIZE = (s) -> (s.length() < MINIMUM_NAME_SIZE || s.length() > MAXIMUM_NAME_SIZE);
     Predicate<String> INCORRECT_DESCRIPTION_SIZE = (s) -> !s.isEmpty() && (s.length() < MINIMUM_DESCRIPTION_SIZE || s.length() > MAXIMUM_DESCRIPTION_SIZE);
-    Comparator<IOperation> COMPARE_FOR_AMOUNT = (op1,op2)-> op1.getAmount().compareTo(op2.getAmount());
+    Comparator<IOperation> COMPARE_FOR_AMOUNT = Comparator.comparing(IOperation::getAmount);
     /**
      * Returns the unique identifier of the Operation.
      *
@@ -153,4 +153,6 @@ public interface IOperation extends Serializable, Comparable<IOperation> {
      * @return a string representation of the email object.
      */
     String toString();
+
+    IOperation clone();
 }
