@@ -1,11 +1,11 @@
 package bll.exceptions;
 
-public class ProhibitedLessFormOfPayment extends IllegalArgumentException{
+public class ProhibitedLessFormOfPaymentException extends IllegalArgumentException{
     /**
      * Constructs an {@code IllegalArgumentException} with no
      * detail message.
      */
-    public ProhibitedLessFormOfPayment() {
+    public ProhibitedLessFormOfPaymentException() {
         super();
     }
 }
