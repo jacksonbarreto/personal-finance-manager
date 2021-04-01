@@ -119,11 +119,29 @@ public interface IMovement extends IOperation {
     /**
      * Returns if it is a recurring movement.
      * <p>
-     * A movement can not be recurring and installment at the same time.
+     * If a movement is a recurrence, then it cannot be an installment or a common movement.
      *
      * @return {@code true} if it is a recurring movement.
      */
     boolean isRecurrent();
+
+    /**
+     * Returns if it is a installment movement.
+     * <p>
+     * If a movement is an installment, then it cannot be a recurrence or a common movement.
+     *
+     * @return {@code true} if it is a installment movement.
+     */
+    boolean isInstallment();
+
+    /**
+     * Returns if it is a common movement.
+     * <p>
+     * If a movement is common it cannot be recurrent or in installments.
+     *
+     * @return {@code true} if it is a common movement.
+     */
+    boolean isCommonMovement();
 
     /**
      * Returns a clone of the current object.

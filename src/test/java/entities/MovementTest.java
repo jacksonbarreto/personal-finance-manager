@@ -58,23 +58,6 @@ public class MovementTest {
     }
 
     @Test
-    public void shouldThrowExceptionByNullGroupUUID() {
-        assertThrows(NullArgumentException.class, () -> new Movement("Christmas shopping",
-                new BigDecimal("33.50"),
-                LocalDate.now(),
-                formOfPayment,
-                payee,
-                category1, CREDIT, WEEKLY, null));
-
-        assertDoesNotThrow(() -> new Movement("Christmas shopping",
-                new BigDecimal("33.50"),
-                LocalDate.now(),
-                formOfPayment,
-                payee,
-                category1, CREDIT, NONE, UUID.randomUUID()));
-    }
-
-    @Test
     public void shouldHaveTheCorrectGroupID() {
         UUID uuid = UUID.randomUUID();
         UUID uuid1 = UUID.randomUUID();
@@ -84,8 +67,8 @@ public class MovementTest {
                 formOfPayment,
                 payee,
                 category1, CREDIT, NONE, uuid);
-        assertEquals(movement.getGroupID(), movement.getID());
-        assertNotEquals(movement.getGroupID(), uuid);
+        assertNotEquals(movement.getGroupID(), movement.getID());
+        assertEquals(movement.getGroupID(), uuid);
 
         IMovement movement1 = new Movement("Christmas shopping",
                 new BigDecimal("33.50"),
@@ -93,8 +76,8 @@ public class MovementTest {
                 formOfPayment,
                 payee,
                 category1, CREDIT, WEEKLY, uuid1);
-        assertEquals(movement1.getGroupID(), uuid1);
-        assertNotEquals(movement1.getGroupID(), movement1.getID());
+        assertNotEquals(movement1.getGroupID(), uuid1);
+        assertEquals(movement1.getGroupID(), movement1.getID());
 
         assertEquals(obj1.getGroupID(), obj1.getID());
     }
@@ -221,6 +204,31 @@ public class MovementTest {
         assertTrue(movement1.isRecurrent());
         assertFalse(obj1.isRecurrent());
     }
+    @Test
+    public void shouldIdentifyAInstallment() {
+        IMovement movement1 = new Movement("Christmas shopping",
+                new BigDecimal("33.50"),
+                LocalDate.now(),
+                formOfPayment,
+                payee,
+                category1, CREDIT, NONE, UUID.randomUUID());
+
+        assertTrue(movement1.isInstallment());
+        assertFalse(obj1.isRecurrent());
+    }
+
+    @Test
+    public void shouldIdentifyAIndividualMovement() {
+        IMovement movement1 = new Movement("Christmas shopping",
+                new BigDecimal("33.50"),
+                LocalDate.now(),
+                formOfPayment,
+                payee,
+                category1, CREDIT, NONE, null);
+        assertTrue(movement1.isCommonMovement());
+        assertFalse(movement1.isInstallment());
+        assertFalse(obj1.isRecurrent());
+    }
 
     @Test
     public void shouldBeEquals() {
@@ -274,7 +282,7 @@ public class MovementTest {
     }
 
     @Test
-    public void shouldSortByDateCorrectly(){
+    public void shouldSortByDateCorrectly() {
         LocalDate date = LocalDate.of(1970, Month.JANUARY, 1);
         obj2.updateDueDate(date);
         List<IMovement> movements = new ArrayList<>();
@@ -286,7 +294,7 @@ public class MovementTest {
     }
 
     @Test
-    public void shouldSortByAmountCorrectly(){
+    public void shouldSortByAmountCorrectly() {
         LocalDate date = LocalDate.of(1970, Month.JANUARY, 1);
         obj2.updateDueDate(date);
         obj1.updateMovementType(DEBIT);

@@ -32,12 +32,14 @@ public class Movement extends Operation implements IMovement {
         if (MovementType == null || frequency == null)
             throw new NullArgumentException();
 
-        if (frequency == NONE)
-            this.groupID = this.getID();
-        else if (groupID != null)
-            this.groupID = groupID;
-        else
-            throw new NullArgumentException();
+        if (frequency == NONE){
+            if (groupID == null)
+                this.groupID = this.ID;
+            else
+                this.groupID = groupID;
+        }else {
+            this.groupID = this.ID;
+        }
 
         this.MovementType = MovementType;
         this.frequency = frequency;
@@ -241,13 +243,37 @@ public class Movement extends Operation implements IMovement {
     /**
      * Returns if it is a recurring movement.
      * <p>
-     * A movement can not be recurring and installment at the same time.
+     * If a movement is a recurrence, then it cannot be an installment or a common movement.
      *
      * @return {@code true} if it is a recurring movement.
      */
     @Override
     public boolean isRecurrent() {
-        return this.frequency != NONE;
+        return this.frequency != NONE && groupID.equals(ID);
+    }
+
+    /**
+     * Returns if it is a installment movement.
+     * <p>
+     * If a movement is an installment, then it cannot be a recurrence or a common movement.
+     *
+     * @return {@code true} if it is a installment movement.
+     */
+    @Override
+    public boolean isInstallment() {
+        return this.frequency == NONE && !groupID.equals(ID);
+    }
+
+    /**
+     * Returns if it is a common movement.
+     * <p>
+     * If a movement is common it cannot be recurrent or in installments.
+     *
+     * @return {@code true} if it is a common movement.
+     */
+    @Override
+    public boolean isCommonMovement() {
+        return this.frequency == NONE && groupID.equals(ID);
     }
 
     /**
