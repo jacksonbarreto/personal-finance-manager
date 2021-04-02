@@ -75,7 +75,7 @@ public class Movement extends Operation implements IMovement {
         this.ID = movement.getID();
         this.attachments = new HashSet<>();
         this.attachments.addAll(movement.getAttachments());
-        this.groupID = movement.getID();
+        this.groupID = movement.getGroupID();
         this.MovementType = movement.isCredit() ? CREDIT : DEBIT;
         this.frequency = movement.getRepetitionFrequency();
     }
