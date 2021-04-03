@@ -176,6 +176,16 @@ public class TransactionCategory implements ITransactionCategory {
         return new TransactionCategory(this);
     }
 
+    @Override
+    public String toString() {
+        return "TransactionCategory{" +
+                "name='" + name + '\'' +
+                ", imgURI='" + imgURI + '\'' +
+                ", id=" + id +
+                ", active=" + active +
+                '}';
+    }
+
     @SuppressWarnings("unused")
     private TransactionCategory() {
 

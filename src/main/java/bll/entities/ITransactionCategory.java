@@ -111,4 +111,5 @@ public interface ITransactionCategory extends Serializable {
      * @return a clone of the current instance.
      */
     ITransactionCategory clone();
+
 }
