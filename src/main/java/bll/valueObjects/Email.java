@@ -5,9 +5,13 @@ import java.util.Objects;
 import bll.exceptions.InvalidEmailFormatException;
 import bll.exceptions.NullArgumentException;
 
+import javax.persistence.Embeddable;
+import javax.persistence.Transient;
+
 /**
  * Implementation of the {@code IEmail} interface.
  */
+@Embeddable
 final public class Email implements IEmail {
     private String localPart;
     private String domainName;
@@ -39,11 +43,13 @@ final public class Email implements IEmail {
         return this.domainName;
     }
 
+    @Transient
     @Override
     public String getEmail() {
         return this.localPart + "@" + this.domainName;
     }
 
+    @Transient
     @Override
     public boolean isAuthorizedAdvertisingContact() {
         return AdvertisingContact;
@@ -72,21 +78,24 @@ final public class Email implements IEmail {
                 '}';
     }
 
-    @SuppressWarnings("unused")
-    private Email() {
+    protected Email() {
     }
+
     @SuppressWarnings("unused")
     private void setLocalPart(String localPart) {
         this.localPart = localPart;
     }
+
     @SuppressWarnings("unused")
     private void setDomainName(String domainName) {
         this.domainName = domainName;
     }
+
     @SuppressWarnings("unused")
     private boolean isAdvertisingContact() {
         return AdvertisingContact;
     }
+
     @SuppressWarnings("unused")
     private void setAdvertisingContact(boolean advertisingContact) {
         AdvertisingContact = advertisingContact;
