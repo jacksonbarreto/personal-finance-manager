@@ -10,13 +10,13 @@ public enum EHandlingMode implements Serializable {
     THIS_AND_PREVIOUS(5),
     PREVIOUS(6);
 
-    private final int ID;
+    private final Integer ID;
 
     EHandlingMode(int ID) {
         this.ID = ID;
     }
 
-    public int getID() {
+    public Integer getID() {
         return ID;
     }
 }
