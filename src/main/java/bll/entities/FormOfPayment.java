@@ -3,10 +3,13 @@ package bll.entities;
 import bll.exceptions.InvalidNameSizeException;
 import bll.exceptions.NullArgumentException;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
 import java.util.Objects;
 import java.util.UUID;
-
+@Entity
 public class FormOfPayment implements IFormOfPayment {
+    @Id
     private UUID id;
     private String name;
     private boolean active;
@@ -146,8 +149,8 @@ public class FormOfPayment implements IFormOfPayment {
         return new FormOfPayment(this);
     }
 
-    @SuppressWarnings("unused")
-    private FormOfPayment() {
+
+    protected FormOfPayment() {
     }
 
     @SuppressWarnings("unused")
