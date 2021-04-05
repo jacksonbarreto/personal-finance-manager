@@ -1,12 +1,14 @@
 package bll.entities;
 
 import bll.enumerators.EHandlingMode;
+import bll.enumerators.ERepetitionFrequency;
 import bll.exceptions.*;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.Year;
 import java.time.YearMonth;
+import java.util.Comparator;
 import java.util.Currency;
 import java.util.Set;
 import java.util.UUID;
@@ -20,6 +22,7 @@ public interface IWallet extends Serializable, Comparable<IWallet>, Cloneable {
     String EMPTY_DESCRIPTION = "";
     Predicate<String> INCORRECT_NAME_SIZE = (s) -> (s.length() < MINIMUM_NAME_SIZE || s.length() > MAXIMUM_NAME_SIZE);
     Predicate<String> INCORRECT_DESCRIPTION_SIZE = (s) -> !s.isEmpty() && (s.length() < MINIMUM_DESCRIPTION_SIZE || s.length() > MAXIMUM_DESCRIPTION_SIZE);
+    Comparator<IWallet> COMPARE_BY_ESTIMATED_BALANCE = Comparator.comparing(IWallet::getBalanceExpected);
 
     /**
      * Returns the unique identifier of the wallet.
@@ -69,18 +72,33 @@ public interface IWallet extends Serializable, Comparable<IWallet>, Cloneable {
      * Adds a new movement to the portfolio.
      *
      * @param movement a new movement to the portfolio.
-     * @throws NullArgumentException     if the argument is null.
-     * @throws ExistingMovementException if the movement already exists.
+     * @throws NullArgumentException         if the argument is null.
+     * @throws ExistingMovementException     if the movement already exists.
      * @throws IllegalFormOfPaymentException if the form of payment does not exist in the wallet.
+     * @throws InstallmentForbiddenException if you try to add an installment.
      */
     void addMovement(IMovement movement);
+
+    /**
+     * Creates all the installment movements.
+     *
+     * @param movement             basic (initial) movement.
+     * @param frequency            repetition
+     * @param numberOfInstallments number of installment.
+     * @throws NullArgumentException               if the argument is null.
+     * @throws ExistingMovementException           if the movement already exists.
+     * @throws DontIsInstallmentException          if the movement is not an installment plan.
+     * @throws IllegalInstallmentQuantityException if the number of plots is less than 2.
+     */
+    void addInstallment(IMovement movement, ERepetitionFrequency frequency, int numberOfInstallments);
 
     /**
      * Removes a movement from the wallet.
      *
      * @param movement to be removed.
-     * @throws NullArgumentException        if the argument is null.
-     * @throws NonExistentMovementException if the movement does not exist in the wallet.
+     * @throws NullArgumentException          if the argument is null.
+     * @throws NonExistentMovementException   if the movement does not exist in the wallet.
+     * @throws InstallmentWithoutHandlingMode if the movement is in installments.
      */
     void removeMovement(IMovement movement);
 
@@ -99,10 +117,10 @@ public interface IWallet extends Serializable, Comparable<IWallet>, Cloneable {
      * Confirms a movement in the wallet, turning it into a transaction.
      *
      * @param movement to be confirmed.
-     * @throws NullArgumentException        if the argument is null.
-     * @throws NonExistentMovementException if the movement does not exist in the wallet.
+     * @throws NullArgumentException         if the argument is null.
+     * @throws NonExistentMovementException  if the movement does not exist in the wallet.
      * @throws IllegalFormOfPaymentException if the form of payment does not exist in the wallet.
-     * @throws InsufficientFundsException if the wallet does not have funds to support this transaction.
+     * @throws InsufficientFundsException    if the wallet does not have funds to support this transaction.
      */
     void confirmMovement(IMovement movement);
 
@@ -118,7 +136,7 @@ public interface IWallet extends Serializable, Comparable<IWallet>, Cloneable {
      * Removes a form of payment from the wallet.
      *
      * @param formOfPayment to be removed.
-     * @throws NullArgumentException if the argument is null.
+     * @throws NullArgumentException                if the argument is null.
      * @throws ProhibitedLessFormOfPaymentException if the wallet has only one form of payment.
      */
     void removeFormOfPayment(IFormOfPayment formOfPayment);
@@ -158,7 +176,7 @@ public interface IWallet extends Serializable, Comparable<IWallet>, Cloneable {
      *
      * @param movement to be updated.
      * @throws NullArgumentException          if the argument is null.
-     * @throws NonExistentMovementException if the movement does not exist in the wallet.
+     * @throws NonExistentMovementException   if the movement does not exist in the wallet.
      * @throws InstallmentWithoutHandlingMode if the movement is in installments.
      */
     void updateMovement(IMovement movement);
@@ -392,4 +410,8 @@ public interface IWallet extends Serializable, Comparable<IWallet>, Cloneable {
     BigDecimal getCashOutflowInYearExpected(Year year);
 
     IWallet clone();
+
+    boolean equals(Object o);
+
+    boolean isDeepEquals(Object o);
 }
