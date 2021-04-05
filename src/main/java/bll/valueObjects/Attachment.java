@@ -3,8 +3,9 @@ package bll.valueObjects;
 import bll.exceptions.EmptyArgumentException;
 import bll.exceptions.NullArgumentException;
 
+import javax.persistence.Embeddable;
 import java.util.Objects;
-
+@Embeddable
 final public class Attachment implements IAttachment {
 
     private String URI;
@@ -52,8 +53,7 @@ final public class Attachment implements IAttachment {
         this.URI = URI;
     }
 
-    @SuppressWarnings("unused")
-    private Attachment() {
+    protected Attachment() {
     }
 
 
