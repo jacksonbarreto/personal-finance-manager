@@ -8,13 +8,13 @@ public enum ERole implements Serializable {
     PREMIUM(2),
     ADMIN(3);
 
-    private final int ID;
+    private final Integer ID;
 
     ERole(int ID) {
         this.ID = ID;
     }
 
-    public int getID() {
+    public Integer getID() {
         return ID;
     }
 }
