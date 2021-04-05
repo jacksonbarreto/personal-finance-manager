@@ -3,11 +3,14 @@ package bll.entities;
 import bll.exceptions.InvalidNameSizeException;
 import bll.exceptions.NullArgumentException;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
 import java.util.Objects;
 import java.util.UUID;
 
-
+@Entity
 public class Payee implements IPayee {
+    @Id
     private UUID id;
     private String name;
     private boolean active;
@@ -150,8 +153,8 @@ public class Payee implements IPayee {
                 '}';
     }
 
-    @SuppressWarnings("unused")
-    private Payee() {
+
+    protected Payee() {
 
     }
 
