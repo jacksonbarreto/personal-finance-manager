@@ -1,11 +1,11 @@
 package bll.exceptions;
 
-public class EmptyWalletListException extends IllegalArgumentException{
+public class NonExistingPayeeException extends IllegalArgumentException{
     /**
      * Constructs an {@code IllegalArgumentException} with no
      * detail message.
      */
-    public EmptyWalletListException() {
+    public NonExistingPayeeException() {
         super();
     }
 }
