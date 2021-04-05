@@ -10,13 +10,13 @@ public enum ERepetitionFrequency implements Serializable {
     YEARLY(5),
     NONE(6);
 
-    private final int ID;
+    private final Integer ID;
 
     ERepetitionFrequency(int ID) {
         this.ID = ID;
     }
 
-    public int getID() {
+    public Integer getID() {
         return ID;
     }
 }
