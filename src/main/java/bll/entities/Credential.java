@@ -7,16 +7,21 @@ import bll.exceptions.AccessKeysCannotBeEmptyException;
 import bll.exceptions.AccessKeyAlreadyExistsException;
 import bll.exceptions.NullArgumentException;
 
+import javax.persistence.*;
 import java.util.*;
 
 import static bll.entities.ICredential.createHashedPassword;
 import static bll.entities.ICredential.getSaltRandom;
 
+@Entity
 final public class Credential implements ICredential {
+    @Id
     private UUID ID;
+    @ElementCollection(fetch = FetchType.EAGER)
     private Set<String> accessKeys;
     private byte[] salt;
     private String hashedPassword;
+
 
     public Credential(String accessKey, String password) {
         if (accessKey == null || password == null)
@@ -150,8 +155,7 @@ final public class Credential implements ICredential {
                 '}';
     }
 
-    @SuppressWarnings("unused")
-    private Credential() {
+    protected Credential() {
     }
 
     @SuppressWarnings("unused")
