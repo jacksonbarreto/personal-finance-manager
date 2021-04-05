@@ -1,6 +1,7 @@
 package bll.entities;
 
 import bll.enumerators.EHandlingMode;
+import bll.enumerators.EOperationType;
 import bll.enumerators.ERepetitionFrequency;
 import bll.exceptions.*;
 
@@ -45,7 +46,7 @@ public class Wallet implements IWallet {
 
     public Wallet(String name, IFormOfPayment formOfPayment, IPayee payeeFormat) {
         this(name, EMPTY_DESCRIPTION, Currency.getInstance(Locale.getDefault()),
-                new HashSet<>(Collections.singletonList(formOfPayment)),payeeFormat);
+                new HashSet<>(Collections.singletonList(formOfPayment)), payeeFormat);
     }
 
     @SuppressWarnings("unchecked")
@@ -137,25 +138,61 @@ public class Wallet implements IWallet {
      * @throws NullArgumentException         if the argument is null.
      * @throws ExistingMovementException     if the movement already exists.
      * @throws IllegalFormOfPaymentException if the form of payment does not exist in the wallet.
+     * @throws InstallmentForbiddenException if you try to add an installment.
      */
     @Override
     public void addMovement(IMovement movement) {
         if (movement == null)
             throw new NullArgumentException();
-        if (movements.contains(movement))
-            throw new ExistingMovementException();
+        if (movement.isInstallment())
+            throw new InstallmentForbiddenException();
         if (!formOfPayments.contains(movement.getFormOfPayment()))
             throw new IllegalFormOfPaymentException();
+        if (movements.contains(movement))
+            throw new ExistingMovementException();
         this.movements.add(movement.clone());
     }
 
+    /**
+     * Creates all the installment movements.
+     *
+     * @param movement             basic (initial) movement.
+     * @param frequency            repetition
+     * @param numberOfInstallments number of installment.
+     * @throws NullArgumentException               if the argument is null.
+     * @throws ExistingMovementException           if the movement already exists.
+     * @throws DontIsInstallmentException          if the movement is not an installment plan.
+     * @throws IllegalInstallmentQuantityException if the number of plots is less than 2.
+     */
+    @Override
+    public void addInstallment(IMovement movement, ERepetitionFrequency frequency, int numberOfInstallments) {
+        if (movement == null || frequency == null)
+            throw new NullArgumentException();
+        if (movements.contains(movement))
+            throw new ExistingMovementException();
+        if (!movement.isInstallment())
+            throw new DontIsInstallmentException();
+        if (numberOfInstallments < 2)
+            throw new IllegalInstallmentQuantityException();
+
+        movements.add(movement.clone());
+        LocalDate nextDate = updateRecurrenceDate(movement.getDueDate(), frequency);
+        for (int i = 0; i < numberOfInstallments - 1; i++) {
+            movements.add(new Movement(movement.getName(), movement.getDescription(), movement.getAmount(),
+                    nextDate, movement.getFormOfPayment(), movement.getPayee(), movement.getCategory(),
+                    movement.getAttachments(), movement.isCredit() ? EOperationType.CREDIT : EOperationType.DEBIT,
+                    ERepetitionFrequency.NONE, movement.getGroupID()));
+            nextDate = updateRecurrenceDate(nextDate, frequency);
+        }
+    }
 
     /**
      * Removes a movement from the wallet.
      *
      * @param movement to be removed.
-     * @throws NullArgumentException        if the argument is null.
-     * @throws NonExistentMovementException if the movement does not exist in the wallet.
+     * @throws NullArgumentException          if the argument is null.
+     * @throws NonExistentMovementException   if the movement does not exist in the wallet.
+     * @throws InstallmentWithoutHandlingMode if the movement is in installments.
      */
     @Override
     public void removeMovement(IMovement movement) {
@@ -163,6 +200,8 @@ public class Wallet implements IWallet {
             throw new NullArgumentException();
         if (!this.movements.contains(movement))
             throw new NonExistentMovementException();
+        if (movement.isInstallment())
+            throw new InstallmentWithoutHandlingMode();
         this.movements.remove(movement);
     }
 
@@ -179,29 +218,12 @@ public class Wallet implements IWallet {
     public void removeInstallment(IMovement installment, EHandlingMode handlingMode) {
         if (installment == null || handlingMode == null)
             throw new NullArgumentException();
+        if (!installment.isInstallment())
+            throw new DontIsInstallmentException();
         if (!this.movements.contains(installment))
             throw new NonExistentMovementException();
-        if (installment.getGroupID() == installment.getID())
-            throw new DontIsInstallmentException();
 
-        if (handlingMode == EHandlingMode.JUST_THIS_ONE) {
-            movements.remove(installment);
-        } else {
-            Predicate<IMovement> predicate = (m) -> true;
-            switch (handlingMode) {
-                case THIS_AND_NEXT -> predicate = (m) -> m.getDueDate().isAfter(installment.getDueDate()) || m.getID().equals(installment.getID());
-                case NEXT -> predicate = (m) -> m.getDueDate().isAfter(installment.getDueDate());
-                case THIS_AND_PREVIOUS -> predicate = (m) -> m.getDueDate().isBefore(installment.getDueDate()) || m.getID().equals(installment.getID());
-                case PREVIOUS -> predicate = (m) -> m.getDueDate().isBefore(installment.getDueDate());
-            }
-
-            Iterator<IMovement> it = movements.iterator();
-            while (it.hasNext()) {
-                IMovement movement = it.next();
-                if (movement.getGroupID().equals(installment.getGroupID()) && predicate.test(movement))
-                    it.remove();
-            }
-        }
+        updateOrDeleteMovement(installment, handlingMode, Action.REMOVE);
     }
 
     /**
@@ -320,20 +342,20 @@ public class Wallet implements IWallet {
      *
      * @param movement to be updated.
      * @throws NullArgumentException          if the argument is null.
-     * @throws NonExistentMovementException if the movement does not exist in the wallet.
+     * @throws NonExistentMovementException   if the movement does not exist in the wallet.
      * @throws InstallmentWithoutHandlingMode if the movement is in installments.
-     * @throws IllegalFormOfPaymentException if the form of payment does not exist in the wallet.
+     * @throws IllegalFormOfPaymentException  if the form of payment does not exist in the wallet.
      */
     @Override
     public void updateMovement(IMovement movement) {
         if (movement == null)
             throw new NullArgumentException();
-        if (!this.movements.contains(movement))
-            throw new NonExistentMovementException();
         if (movement.isInstallment())
             throw new InstallmentWithoutHandlingMode();
         if (!formOfPayments.contains(movement.getFormOfPayment()))
             throw new IllegalFormOfPaymentException();
+        if (!this.movements.contains(movement))
+            throw new NonExistentMovementException();
         movements.remove(movement);
         movements.add(movement.clone());
     }
@@ -343,9 +365,9 @@ public class Wallet implements IWallet {
      *
      * @param installment  to be updated.
      * @param handlingMode How the update should take place.
-     * @throws NullArgumentException        if the argument is null.
-     * @throws NonExistentMovementException if the movement does not exist in the wallet.
-     * @throws DontIsInstallmentException   if the movement is not an installment plan.
+     * @throws NullArgumentException         if the argument is null.
+     * @throws NonExistentMovementException  if the movement does not exist in the wallet.
+     * @throws DontIsInstallmentException    if the movement is not an installment plan.
      * @throws IllegalFormOfPaymentException if the form of payment does not exist in the wallet.
      */
     @Override
@@ -359,25 +381,7 @@ public class Wallet implements IWallet {
         if (!formOfPayments.contains(installment.getFormOfPayment()))
             throw new IllegalFormOfPaymentException();
 
-        if (handlingMode == EHandlingMode.JUST_THIS_ONE) {
-            movements.remove(installment);
-            movements.add(installment);
-        } else {
-            Predicate<IMovement> predicate = (m) -> true;
-            switch (handlingMode) {
-                case THIS_AND_NEXT -> predicate = (m) -> m.getDueDate().isAfter(installment.getDueDate()) || m.getID().equals(installment.getID());
-                case NEXT -> predicate = (m) -> m.getDueDate().isAfter(installment.getDueDate());
-                case THIS_AND_PREVIOUS -> predicate = (m) -> m.getDueDate().isBefore(installment.getDueDate()) || m.getID().equals(installment.getID());
-                case PREVIOUS -> predicate = (m) -> m.getDueDate().isBefore(installment.getDueDate());
-            }
-
-            Iterator<IMovement> it = movements.iterator();
-            while (it.hasNext()) {
-                IMovement movement = it.next();
-                if (movement.getGroupID().equals(installment.getGroupID()) && predicate.test(movement))
-                    it.remove();
-            }
-        }
+        updateOrDeleteMovement(installment, handlingMode, Action.UPDATE);
     }
 
     /**
@@ -746,6 +750,27 @@ public class Wallet implements IWallet {
         return new Wallet(this);
     }
 
+    @Override
+    public boolean isDeepEquals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Wallet wallet = (Wallet) o;
+        return ID.equals(wallet.ID) && name.equals(wallet.name) && description.equals(wallet.description) && currency.equals(wallet.currency) && formOfPayments.equals(wallet.formOfPayments) && movements.equals(wallet.movements) && transactions.equals(wallet.transactions) && payeeFormat.equals(wallet.payeeFormat);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Wallet wallet = (Wallet) o;
+        return ID.equals(wallet.ID);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(ID);
+    }
+
     /**
      * Compares this object with the specified object for order.  Returns a
      * negative integer, zero, or a positive integer as this object is less
@@ -787,7 +812,7 @@ public class Wallet implements IWallet {
      */
     @Override
     public int compareTo(IWallet o) {
-        return getBalance().compareTo(o.getBalance());
+        return this.getBalance().compareTo(o.getBalance());
     }
 
     private BigDecimal getCashFlow(Predicate<IOperation> predicate, Collection<? extends IOperation> operations) {
@@ -834,18 +859,49 @@ public class Wallet implements IWallet {
             destination.add(o.clone());
         return destination;
     }
-    private boolean existingMovement(IMovement movement){
-        boolean found = false;
-        IMovement currentMovement;
-        Iterator<IMovement> iterator = movements.iterator();
-        while (iterator.hasNext() && !found) {
-            currentMovement = iterator.next();
-            if (currentMovement.equals(movement)) {
-                found = true;
+
+    private enum Action {
+        UPDATE, REMOVE
+    }
+
+    private void updateOrDeleteMovement(IMovement movement, EHandlingMode handlingMode, Action action) {
+
+        if (handlingMode == EHandlingMode.JUST_THIS_ONE) {
+            movements.remove(movement);
+            if (action == Action.UPDATE)
+                movements.add(movement);
+        } else {
+            Predicate<IMovement> predicate = (m) -> true;
+            switch (handlingMode) {
+                case THIS_AND_NEXT -> predicate = (m) -> m.getDueDate().isAfter(movement.getDueDate()) || m.getID().equals(movement.getID());
+                case NEXT -> predicate = (m) -> m.getDueDate().isAfter(movement.getDueDate());
+                case THIS_AND_PREVIOUS -> predicate = (m) -> m.getDueDate().isBefore(movement.getDueDate()) || m.getID().equals(movement.getID());
+                case PREVIOUS -> predicate = (m) -> m.getDueDate().isBefore(movement.getDueDate());
+            }
+
+            Iterator<IMovement> it = movements.iterator();
+            while (it.hasNext()) {
+                IMovement m = it.next();
+                if (m.getGroupID().equals(movement.getGroupID()) && predicate.test(m)) {
+                    if (action == Action.REMOVE)
+                        it.remove();
+                    else
+                        synchronizeMovement(movement, m);
+                }
             }
         }
-        return found;
     }
+
+    private void synchronizeMovement(IMovement source, IMovement destiny) {
+        destiny.updateName(source.getName());
+        destiny.updateMovementType(source.isCredit() ? EOperationType.CREDIT : EOperationType.DEBIT);
+        destiny.updateFormOfPayment(source.getFormOfPayment());
+        destiny.updateAmount(source.getAmount());
+        destiny.updatePayee(source.getPayee());
+        destiny.updateCategory(source.getCategory());
+        destiny.updateDescription(source.getDescription());
+    }
+
     @SuppressWarnings("unused")
     private Wallet() {
     }
