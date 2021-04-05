@@ -9,13 +9,13 @@ public enum EUserState implements Serializable {
     INVALID_LOGIN_ATTEMPT(4),
     INACTIVE(5);
 
-    private final int ID;
+    private final Integer ID;
 
     EUserState(int ID) {
         this.ID = ID;
     }
 
-    public int getID() {
+    public Integer getID() {
         return ID;
     }
 }
