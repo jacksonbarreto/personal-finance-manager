@@ -6,13 +6,13 @@ public enum EOperationType implements Serializable {
     DEBIT(1),
     CREDIT(2);
 
-    private final int ID;
+    private final Integer ID;
 
     EOperationType(int ID) {
         this.ID = ID;
     }
 
-    public int getID() {
+    public Integer getID() {
         return ID;
     }
 }
