@@ -11,10 +11,11 @@ import java.time.Year;
 import java.time.YearMonth;
 import java.util.*;
 
-import static bll.enumerators.EHandlingMode.JUST_THIS_ONE;
+import static bll.entities.IWallet.COMPARE_BY_ESTIMATED_BALANCE;
+import static bll.enumerators.EHandlingMode.*;
 import static bll.enumerators.EOperationType.CREDIT;
 import static bll.enumerators.EOperationType.DEBIT;
-import static bll.enumerators.ERepetitionFrequency.NONE;
+import static bll.enumerators.ERepetitionFrequency.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class WalletTest {
@@ -157,7 +158,18 @@ public class WalletTest {
     @Test
     public void shouldThrowExceptionForTryingToRemoveNonexistentMovement() {
         assertThrows(NonExistentMovementException.class, () -> obj1.removeMovement(movement1));
-        assertThrows(NonExistentMovementException.class, () -> obj1.removeInstallment(movement1,JUST_THIS_ONE));
+    }
+
+    @Test
+    public void shouldThrowExceptionForTryingToRemoveAMovementWithoutHandlingMode() {
+        IMovement installment = new Movement("A Installment",
+                new BigDecimal("33.60"),
+                LocalDate.now(),
+                formOfPayment1,
+                payee,
+                category1, CREDIT, NONE, UUID.randomUUID());
+        obj1.addInstallment(installment, WEEKLY, 2);
+        assertThrows(InstallmentWithoutHandlingMode.class, () -> obj1.removeMovement(installment));
     }
 
     @Test
@@ -228,7 +240,7 @@ public class WalletTest {
     }
 
     @Test
-    public void shouldUpdateAMovementCorrectly(){
+    public void shouldUpdateAMovementCorrectly() {
         IMovement installment = new Movement("A Installment",
                 new BigDecimal("33.60"),
                 LocalDate.now(),
@@ -236,20 +248,18 @@ public class WalletTest {
                 payee,
                 category1, CREDIT, NONE, UUID.randomUUID());
 
-        assertThrows(NullArgumentException.class, ()-> obj1.updateMovement(null));
-        assertThrows(NonExistentMovementException.class, ()-> obj1.updateMovement(movement1));
-
+        assertThrows(NullArgumentException.class, () -> obj1.updateMovement(null));
+        assertThrows(NonExistentMovementException.class, () -> obj1.updateMovement(movement2));
+        assertTrue(obj1.getMovements().isEmpty());
         obj1.addMovement(movement2);
         movement2.updateFormOfPayment(formOfPayment2);
-        assertThrows(IllegalFormOfPaymentException.class, ()-> obj1.updateMovement(movement2));
-       // obj1.removeMovement(movement2);
+        assertThrows(IllegalFormOfPaymentException.class, () -> obj1.updateMovement(movement2));
 
-        obj1.addMovement(installment);
-        assertThrows(InstallmentWithoutHandlingMode.class, ()-> obj1.updateMovement(installment));
-        //obj1.removeMovement(installment);
-        assertEquals(2, obj1.getMovements().size());
+        obj1.addInstallment(installment, QUARTERLY, 2);
+        assertThrows(InstallmentWithoutHandlingMode.class, () -> obj1.updateMovement(installment));
+        obj1.removeInstallment(installment, ALL);
+
         obj1.addMovement(movement1);
-        assertEquals(3, obj1.getMovements().size());
         movement1.updateName("New Movement Name");
         obj1.updateMovement(movement1);
         List<IMovement> movements = new ArrayList<>(obj1.getMovements());
@@ -258,8 +268,64 @@ public class WalletTest {
     }
 
     @Test
-    public void shouldRemoveAInstallment(){
+    public void shouldAddInstallment() {
+        IMovement installment = new Movement("A Installment",
+                new BigDecimal("33.60"),
+                LocalDate.now(),
+                formOfPayment1,
+                payee,
+                category1, CREDIT, NONE, UUID.randomUUID());
+        assertThrows(NullArgumentException.class, () -> obj1.addInstallment(null, WEEKLY, 20));
+        assertThrows(NullArgumentException.class, () -> obj1.addInstallment(installment, null, 20));
+        assertThrows(DontIsInstallmentException.class, () -> obj1.addInstallment(movement1, YEARLY, 20));
+        assertThrows(IllegalInstallmentQuantityException.class, () -> obj1.addInstallment(installment, YEARLY, 1));
 
+        obj1.addInstallment(installment, MONTHLY, 5);
+        assertEquals(5, obj1.getMovements().size());
+        assertThrows(ExistingMovementException.class, () -> obj1.addInstallment(installment, YEARLY, 20));
+        int i = 0;
+        for (IMovement m : obj1.getMovements()) {
+            assertEquals(LocalDate.now().plusMonths(i), m.getDueDate());
+            i++;
+        }
+    }
+
+    @Test
+    public void shouldRemoveAInstallment() {
+        UUID groupID = UUID.randomUUID();
+        IMovement installment = new Movement("A Installment",
+                new BigDecimal("33.60"),
+                LocalDate.now(),
+                formOfPayment1,
+                payee,
+                category1, CREDIT, NONE, groupID);
+
+        assertThrows(NullArgumentException.class, () -> obj1.removeInstallment(null, NEXT));
+        assertThrows(DontIsInstallmentException.class, () -> obj1.removeInstallment(movement1, NEXT));
+
+        obj1.addInstallment(installment, MONTHLY, 6);
+        assertThrows(NullArgumentException.class, () -> obj1.removeInstallment(installment, null));
+        assertEquals(6, obj1.getMovements().size());
+
+        obj1.removeInstallment(installment, THIS_AND_NEXT);
+        assertTrue(obj1.getMovements().isEmpty());
+        assertThrows(NonExistentMovementException.class, () -> obj1.removeInstallment(installment, THIS_AND_NEXT));
+
+        obj1.addInstallment(installment, MONTHLY, 6);
+        obj1.removeInstallment(installment, ALL);
+        assertTrue(obj1.getMovements().isEmpty());
+
+        List<IMovement> movements;
+        obj1.addInstallment(installment, MONTHLY, 6);
+        movements = new ArrayList<>(obj1.getMovements());
+        obj1.removeInstallment(movements.get(3), NEXT);
+        assertEquals(4, obj1.getMovements().size());
+        obj1.removeInstallment(movements.get(1), THIS_AND_PREVIOUS);
+        assertEquals(2, obj1.getMovements().size());
+        obj1.removeInstallment(movements.get(3), PREVIOUS);
+        assertEquals(1, obj1.getMovements().size());
+        obj1.removeInstallment(movements.get(3), JUST_THIS_ONE);
+        assertTrue(obj1.getMovements().isEmpty());
     }
 
     @Test
@@ -378,21 +444,94 @@ public class WalletTest {
 
     @Test
     public void shouldBeEquals() {
+        IWallet obj2 = obj1.clone();
+        obj2.updateName("Wallet 2");
+        IWallet obj3 = obj2.clone();
+        obj3.updateName("Wallet 3");
 
+        assertEquals(obj1, obj2);
+        assertEquals(obj2, obj3);
+        assertEquals(obj1, obj3);
     }
 
     @Test
     public void shouldBeDeepEquals() {
-
+        IWallet obj2 = obj1.clone();
+        assertTrue(obj1.isDeepEquals(obj1.clone()));
+        assertTrue(obj2.isDeepEquals(obj1));
     }
 
     @Test
     public void shouldBeDifferent() {
-
+        IWallet obj2 = obj1.clone();
+        obj2.updateName("Wallet 2");
+        assertFalse(obj1.isDeepEquals(obj2));
     }
 
     @Test
     public void shouldBeAClone() {
+        assertEquals(obj1, obj1.clone());
+    }
 
+    @Test
+    public void shouldCashOutFlowCorrectly() {
+        obj1.addMovement(movement1);
+        obj1.addMovement(movement2);
+        assertEquals(new BigDecimal("-33.50"), obj1.getCashOutflowExpected());
+        assertEquals(BigDecimal.ZERO, obj1.getCashOutflow());
+        obj1.confirmMovement(movement2);
+        obj1.confirmMovement(movement1);
+        assertEquals(new BigDecimal("-33.50"), obj1.getCashOutflowExpected());
+        assertEquals(new BigDecimal("-33.50"), obj1.getCashOutflow());
+        assertEquals(new BigDecimal("-33.50"), obj1.getCashOutflowInYear());
+        assertEquals(BigDecimal.ZERO, obj1.getCashOutflowInYear(Year.of(1970)));
+    }
+
+    @Test
+    public void shouldCashInFlowExpectedCorrectly() {
+        obj1.addMovement(movement2);
+        assertEquals(new BigDecimal("122.30"), obj1.getCashInflowExpected(YearMonth.of(1970, Month.JANUARY)));
+        assertEquals(new BigDecimal("122.30"), obj1.getCashInflowInYearExpected(Year.of(1970)));
+        IMovement movement3 = new Movement("New credit",
+                new BigDecimal("80.30"),
+                LocalDate.now(),
+                formOfPayment1,
+                payee,
+                category2, CREDIT);
+        obj1.addMovement(movement3);
+        assertEquals(new BigDecimal("80.30"), obj1.getCashInflowExpected());
+        assertEquals(new BigDecimal("80.30"), obj1.getCashInflowInYearExpected());
+    }
+
+    @Test
+    public void shouldSort() {
+        IMovement installment = new Movement("A Installment",
+                new BigDecimal("33.60"),
+                LocalDate.of(1970, Month.JANUARY, 1),
+                formOfPayment1,
+                payee,
+                category1, CREDIT, NONE, UUID.randomUUID());
+        IWallet obj2 = obj1.clone();
+        obj2.updateName("wallet 2");
+        List<IWallet> wallets = new ArrayList<>(Arrays.asList(obj2, obj1));
+
+        obj2.addInstallment(installment, MONTHLY, 5);
+        obj1.addMovement(movement2);
+
+        assertEquals(obj1.getName(), wallets.get(1).getName());
+        Collections.sort(wallets);
+        assertEquals(obj1.getName(), wallets.get(1).getName());
+
+        wallets.sort(COMPARE_BY_ESTIMATED_BALANCE);
+        assertEquals(obj2.getName(), wallets.get(1).getName());
+
+        obj1.confirmMovement(movement2);
+        Collections.sort(wallets);
+        assertEquals(obj1.getName(), wallets.get(1).getName());
+
+        for (IMovement m : obj2.getMovements())
+            obj2.confirmMovement(m);
+        Collections.sort(wallets);
+        assertEquals(obj2.getName(), wallets.get(1).getName());
     }
 }
