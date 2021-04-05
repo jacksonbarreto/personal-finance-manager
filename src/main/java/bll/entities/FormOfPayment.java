@@ -97,7 +97,7 @@ public class FormOfPayment implements IFormOfPayment {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, active);
+        return Objects.hash(id);
     }
 
     /**

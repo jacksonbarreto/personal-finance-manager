@@ -185,7 +185,7 @@ public abstract class Operation implements IOperation {
 
     @Override
     public int hashCode() {
-        return Objects.hash(ID, name, description, amount, dueDate, formOfPayment, payee, category, attachments);
+        return Objects.hash(ID);
     }
 
     /**

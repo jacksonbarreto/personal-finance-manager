@@ -127,7 +127,7 @@ public class TransactionCategory implements ITransactionCategory {
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, imgURI, id, active);
+        return Objects.hash(id);
     }
 
     /**

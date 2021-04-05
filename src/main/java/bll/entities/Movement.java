@@ -302,7 +302,7 @@ public class Movement extends Operation implements IMovement {
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), MovementType, frequency, groupID);
+        return Objects.hash(super.hashCode());
     }
 
     /**
