@@ -98,7 +98,7 @@ public class Payee implements IPayee {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, active);
+        return Objects.hash(id);
     }
 
     /**
@@ -139,6 +139,15 @@ public class Payee implements IPayee {
 
     public IPayee clone() {
         return new Payee(this);
+    }
+
+    @Override
+    public String toString() {
+        return "Payee{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", active=" + active +
+                '}';
     }
 
     @SuppressWarnings("unused")
