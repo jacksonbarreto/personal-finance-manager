@@ -1,25 +1,25 @@
 package entities;
 
 import bll.entities.ITransactionCategory;
-import bll.entities.TransactionCategory;
+import bll.entities.MovementCategory;
 import bll.exceptions.InvalidNameSizeException;
 import bll.exceptions.NullArgumentException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class TransactionCategoryTest {
+public class MovementCategoryTest {
 
-    ITransactionCategory t1 = new TransactionCategory("Educação");
-    ITransactionCategory t2 = new TransactionCategory("Restauração", "/rest.png", true);
-    ITransactionCategory t3 = new TransactionCategory(t1);
-    ITransactionCategory t4 = new TransactionCategory(t3);
-    ITransactionCategory t5 = new TransactionCategory("Impostos", "./assets/tax.png");
+    ITransactionCategory t1 = new MovementCategory("Educação");
+    ITransactionCategory t2 = new MovementCategory("Restauração", "/rest.png", true);
+    ITransactionCategory t3 = new MovementCategory(t1);
+    ITransactionCategory t4 = new MovementCategory(t3);
+    ITransactionCategory t5 = new MovementCategory("Impostos", "./assets/tax.png");
 
     @Test
     public void exceptionShouldBeRaisedForHavingANameLessThanTheMinimumSize() {
-        assertThrows(InvalidNameSizeException.class, () -> new TransactionCategory("Xz"));
-        assertThrows(InvalidNameSizeException.class, () -> new TransactionCategory(""));
+        assertThrows(InvalidNameSizeException.class, () -> new MovementCategory("Xz"));
+        assertThrows(InvalidNameSizeException.class, () -> new MovementCategory(""));
         assertThrows(InvalidNameSizeException.class, () -> t1.updateName("fV"));
         assertThrows(InvalidNameSizeException.class, () -> t4.updateName(""));
 
@@ -27,7 +27,7 @@ public class TransactionCategoryTest {
 
     @Test
     public void exceptionShouldBeRaisedForHavingANameLessThanTheMaximumSize() {
-        assertThrows(InvalidNameSizeException.class, () -> new TransactionCategory("ShouldBeRaisedForHavingANameLessThanTheMaximumSize"));
+        assertThrows(InvalidNameSizeException.class, () -> new MovementCategory("ShouldBeRaisedForHavingANameLessThanTheMaximumSize"));
         assertThrows(InvalidNameSizeException.class, () -> t1.updateName("ShouldBeRaisedForHavingANameLessThanTheMaximumSize"));
         assertThrows(InvalidNameSizeException.class, () -> t4.updateName("ShouldBeRaisedForHavingANameLessThanTheMaximumSize"));
     }
@@ -35,7 +35,7 @@ public class TransactionCategoryTest {
     @Test
     public void shouldThrowExceptionByNullName() {
         String nullValue = null;
-        assertThrows(NullArgumentException.class, () -> new TransactionCategory(nullValue));
+        assertThrows(NullArgumentException.class, () -> new MovementCategory(nullValue));
         assertThrows(NullArgumentException.class, () -> t1.updateName(nullValue));
         assertThrows(NullArgumentException.class, () -> t4.updateName(nullValue));
     }
@@ -43,7 +43,7 @@ public class TransactionCategoryTest {
     @Test
     public void shouldThrowExceptionByNullImgURI() {
         String nullValue = null;
-        assertThrows(NullArgumentException.class, () -> new TransactionCategory("Name", nullValue));
+        assertThrows(NullArgumentException.class, () -> new MovementCategory("Name", nullValue));
         assertThrows(NullArgumentException.class, () -> t1.updateName(nullValue));
         assertThrows(NullArgumentException.class, () -> t4.updateName(nullValue));
     }
@@ -51,7 +51,7 @@ public class TransactionCategoryTest {
     @Test
     public void shouldThrowExceptionByNullTransactionCategory() {
         ITransactionCategory nullValue = null;
-        assertThrows(NullArgumentException.class, () -> new TransactionCategory(nullValue));
+        assertThrows(NullArgumentException.class, () -> new MovementCategory(nullValue));
     }
 
     @Test

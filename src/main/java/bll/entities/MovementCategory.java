@@ -9,14 +9,14 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Entity
-public class TransactionCategory implements ITransactionCategory {
+public class MovementCategory implements ITransactionCategory {
     @Id
     private UUID id;
     private String name;
     private String imgURI;
     private boolean active;
 
-    public TransactionCategory(String name, String imgURI, boolean active) {
+    public MovementCategory(String name, String imgURI, boolean active) {
         if (name == null || imgURI == null)
             throw new NullArgumentException();
         if (INCORRECT_NAME_SIZE.test(name.trim()))
@@ -27,15 +27,15 @@ public class TransactionCategory implements ITransactionCategory {
         this.id = UUID.randomUUID();
     }
 
-    public TransactionCategory(String name, String imgURI) {
+    public MovementCategory(String name, String imgURI) {
         this(name, imgURI, true);
     }
 
-    public TransactionCategory(String name) {
+    public MovementCategory(String name) {
         this(name, "", true);
     }
 
-    public TransactionCategory(ITransactionCategory transactionCategory) {
+    public MovementCategory(ITransactionCategory transactionCategory) {
         if (transactionCategory == null)
             throw new NullArgumentException();
         this.name = transactionCategory.getName();
@@ -116,7 +116,7 @@ public class TransactionCategory implements ITransactionCategory {
     public boolean isDeepEquals(Object obj) {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
-        TransactionCategory that = (TransactionCategory) obj;
+        MovementCategory that = (MovementCategory) obj;
         return active == that.active && name.equals(that.name) && Objects.equals(imgURI, that.imgURI) && id.equals(that.id);
     }
 
@@ -124,7 +124,7 @@ public class TransactionCategory implements ITransactionCategory {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        TransactionCategory that = (TransactionCategory) o;
+        MovementCategory that = (MovementCategory) o;
         return id.equals(that.id);
     }
 
@@ -176,7 +176,7 @@ public class TransactionCategory implements ITransactionCategory {
      */
     @Override
     public ITransactionCategory clone() {
-        return new TransactionCategory(this);
+        return new MovementCategory(this);
     }
 
     @Override
@@ -190,7 +190,7 @@ public class TransactionCategory implements ITransactionCategory {
     }
 
 
-    protected TransactionCategory() {
+    protected MovementCategory() {
 
     }
 
