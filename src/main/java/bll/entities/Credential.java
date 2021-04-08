@@ -18,8 +18,11 @@ final public class Credential implements ICredential {
     @Id
     private UUID ID;
     @ElementCollection(fetch = FetchType.EAGER)
+    @Column(nullable = false)
     private Set<String> accessKeys;
+    @Column(nullable = false)
     private byte[] salt;
+    @Column(nullable = false)
     private String hashedPassword;
 
 
