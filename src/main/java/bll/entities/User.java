@@ -5,20 +5,37 @@ import bll.enumerators.EUserState;
 import bll.exceptions.*;
 import bll.valueObjects.IEmail;
 
+import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.*;
 
+@Entity
 public class User implements IUser {
+    @Id
     private UUID ID;
+    @Column(nullable = false, length = MAXIMUM_NAME_SIZE)
     private String name;
+    @Column(nullable = false)
     private LocalDate registrationDate;
+    @OneToOne(targetEntity = Credential.class)
+    @JoinColumn(nullable = false)
     private ICredential credential;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Enumerated
+    @Column(nullable = false)
     private List<EUserState> userStates;
+    @ElementCollection(fetch = FetchType.LAZY)
+    @Enumerated
+    @Column(nullable = false)
     private List<ERole> roles;
+    @Column(nullable = false, unique = true)
     private IEmail email;
+    @OneToMany(targetEntity = Wallet.class)
     private Set<IWallet> wallets;
+    @OneToMany(targetEntity = Payee.class)
     private Set<IPayee> payees;
-    private Set<ITransactionCategory> categories;
+    @OneToMany(targetEntity = MovementCategory.class)
+    private Set<IMovementCategory> categories;
 
     public User(String name, ICredential credential, List<EUserState> userStates, List<ERole> roles, IEmail email) {
         if (name == null || credential == null || userStates == null || roles == null || email == null)
@@ -356,9 +373,9 @@ public class User implements IUser {
      * @return a collection with the user's categories of operations.
      */
     @Override
-    public Set<ITransactionCategory> getCategory() {
-        Set<ITransactionCategory> categorySet = new HashSet<>();
-        for (ITransactionCategory c : this.categories)
+    public Set<IMovementCategory> getCategory() {
+        Set<IMovementCategory> categorySet = new HashSet<>();
+        for (IMovementCategory c : this.categories)
             categorySet.add(c.clone());
         return categorySet;
     }
@@ -371,7 +388,7 @@ public class User implements IUser {
      * @throws ExistingCategoryException if you try to add a category that already exists.
      */
     @Override
-    public void addCategory(ITransactionCategory category) {
+    public void addCategory(IMovementCategory category) {
         if (category == null)
             throw new NullArgumentException();
         if (this.categories.contains(category))
@@ -388,7 +405,7 @@ public class User implements IUser {
      * @throws NonExistingCategoryException if you try to update a category that doesn't exist.
      */
     @Override
-    public void updateCategory(ITransactionCategory category) {
+    public void updateCategory(IMovementCategory category) {
         if (category == null)
             throw new NullArgumentException();
         if (!this.categories.contains(category))
@@ -460,8 +477,7 @@ public class User implements IUser {
         return Objects.hash(ID);
     }
 
-    @SuppressWarnings("unused")
-    private User() {
+    protected User() {
     }
 
     @SuppressWarnings("unused")
@@ -515,12 +531,12 @@ public class User implements IUser {
     }
 
     @SuppressWarnings("unused")
-    private Set<ITransactionCategory> getCategories() {
+    private Set<IMovementCategory> getCategories() {
         return categories;
     }
 
     @SuppressWarnings("unused")
-    private void setCategories(Set<ITransactionCategory> categories) {
+    private void setCategories(Set<IMovementCategory> categories) {
         this.categories = categories;
     }
 }
