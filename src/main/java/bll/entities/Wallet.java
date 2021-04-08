@@ -1,6 +1,6 @@
 package bll.entities;
 
-import bll.Factories.IMovementFactory;
+import bll.factories.IMovementFactory;
 import bll.enumerators.EHandlingMode;
 import bll.enumerators.EOperationType;
 import bll.enumerators.ERepetitionFrequency;

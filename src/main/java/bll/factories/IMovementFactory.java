@@ -1,4 +1,4 @@
-package bll.Factories;
+package bll.factories;
 
 import bll.entities.IMovement;
 import bll.entities.Movement;
