@@ -7,7 +7,7 @@ import java.io.Serializable;
 import java.util.UUID;
 import java.util.function.Predicate;
 
-public interface ITransactionCategory extends Serializable {
+public interface IMovementCategory extends Serializable {
 
     int MINIMUM_NAME_SIZE = 3;
     int MAXIMUM_NAME_SIZE = 30;
@@ -110,6 +110,6 @@ public interface ITransactionCategory extends Serializable {
      *
      * @return a clone of the current instance.
      */
-    ITransactionCategory clone();
+    IMovementCategory clone();
 
 }

@@ -9,7 +9,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Entity
-public class MovementCategory implements ITransactionCategory {
+public class MovementCategory implements IMovementCategory {
     @Id
     private UUID id;
     private String name;
@@ -35,7 +35,7 @@ public class MovementCategory implements ITransactionCategory {
         this(name, "", true);
     }
 
-    public MovementCategory(ITransactionCategory transactionCategory) {
+    public MovementCategory(IMovementCategory transactionCategory) {
         if (transactionCategory == null)
             throw new NullArgumentException();
         this.name = transactionCategory.getName();
@@ -175,7 +175,7 @@ public class MovementCategory implements ITransactionCategory {
      * @return a clone of the current instance.
      */
     @Override
-    public ITransactionCategory clone() {
+    public IMovementCategory clone() {
         return new MovementCategory(this);
     }
 

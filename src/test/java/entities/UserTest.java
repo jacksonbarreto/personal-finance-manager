@@ -420,7 +420,7 @@ public class UserTest {
 
     @Test
     public void shouldAddCategory() {
-        ITransactionCategory t1 = new TransactionCategory("Education");
+        IMovementCategory t1 = new MovementCategory("Education");
         assertTrue(obj1.getCategory().isEmpty());
         obj1.addCategory(t1);
         assertEquals(1, obj1.getCategory().size());
@@ -430,7 +430,7 @@ public class UserTest {
 
     @Test
     public void shouldThrowExceptionByTryAddExistingCategory() {
-        ITransactionCategory t1 = new TransactionCategory("Education");
+        IMovementCategory t1 = new MovementCategory("Education");
         obj1.addCategory(t1);
         assertThrows(ExistingCategoryException.class, () -> obj1.addCategory(t1));
     }
@@ -442,13 +442,13 @@ public class UserTest {
 
     @Test
     public void shouldThrowExceptionByTryUpdateANonExistingCategory() {
-        ITransactionCategory t1 = new TransactionCategory("Education");
+        IMovementCategory t1 = new MovementCategory("Education");
         assertThrows(NonExistingCategoryException.class, () -> obj1.updateCategory(t1));
     }
 
     @Test
     public void shouldUpdateCategory() {
-        ITransactionCategory t1 = new TransactionCategory("Education");
+        IMovementCategory t1 = new MovementCategory("Education");
         obj1.addCategory(t1);
 
         t1.updateName("Food");

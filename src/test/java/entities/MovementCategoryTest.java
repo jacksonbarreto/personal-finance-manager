@@ -1,6 +1,6 @@
 package entities;
 
-import bll.entities.ITransactionCategory;
+import bll.entities.IMovementCategory;
 import bll.entities.MovementCategory;
 import bll.exceptions.InvalidNameSizeException;
 import bll.exceptions.NullArgumentException;
@@ -10,11 +10,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class MovementCategoryTest {
 
-    ITransactionCategory t1 = new MovementCategory("Educação");
-    ITransactionCategory t2 = new MovementCategory("Restauração", "/rest.png", true);
-    ITransactionCategory t3 = new MovementCategory(t1);
-    ITransactionCategory t4 = new MovementCategory(t3);
-    ITransactionCategory t5 = new MovementCategory("Impostos", "./assets/tax.png");
+    IMovementCategory t1 = new MovementCategory("Educação");
+    IMovementCategory t2 = new MovementCategory("Restauração", "/rest.png", true);
+    IMovementCategory t3 = new MovementCategory(t1);
+    IMovementCategory t4 = new MovementCategory(t3);
+    IMovementCategory t5 = new MovementCategory("Impostos", "./assets/tax.png");
 
     @Test
     public void exceptionShouldBeRaisedForHavingANameLessThanTheMinimumSize() {
@@ -50,7 +50,7 @@ public class MovementCategoryTest {
 
     @Test
     public void shouldThrowExceptionByNullTransactionCategory() {
-        ITransactionCategory nullValue = null;
+        IMovementCategory nullValue = null;
         assertThrows(NullArgumentException.class, () -> new MovementCategory(nullValue));
     }
 
@@ -68,7 +68,7 @@ public class MovementCategoryTest {
         assertTrue(t1.isDeepEquals(t3));
         assertTrue(t3.isDeepEquals(t4));
         assertTrue(t1.isDeepEquals(t4));
-        ITransactionCategory ts = t1.clone();
+        IMovementCategory ts = t1.clone();
         assertTrue(ts.isDeepEquals(t1));
     }
 
@@ -127,8 +127,8 @@ public class MovementCategoryTest {
 
     @Test
     public void shouldBeAClone() {
-        ITransactionCategory ts1 = t1.clone();
-        ITransactionCategory ts2 = ts1.clone();
+        IMovementCategory ts1 = t1.clone();
+        IMovementCategory ts2 = ts1.clone();
         assertTrue(t1.isDeepEquals(ts1));
         assertTrue(ts1.isDeepEquals(ts2));
         assertTrue(t1.isDeepEquals(ts2));
