@@ -192,7 +192,7 @@ public interface IUser extends Serializable {
      *
      * @return a collection with the user's categories of operations.
      */
-    Set<ITransactionCategory> getCategory();
+    Set<IMovementCategory> getCategory();
 
     /**
      * Adds an operation category to the user's personal list of categories.
@@ -201,7 +201,7 @@ public interface IUser extends Serializable {
      * @throws NullArgumentException     if the parameter is null.
      * @throws ExistingCategoryException if you try to add a category that already exists.
      */
-    void addCategory(ITransactionCategory category);
+    void addCategory(IMovementCategory category);
 
     /**
      * Updates a category.
@@ -210,7 +210,7 @@ public interface IUser extends Serializable {
      * @throws NullArgumentException        if the parameter is null.
      * @throws NonExistingCategoryException if you try to update a category that doesn't exist.
      */
-    void updateCategory(ITransactionCategory category);
+    void updateCategory(IMovementCategory category);
 
     /**
      * Indicates whether some other User is "equal to" this one.
