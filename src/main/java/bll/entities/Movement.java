@@ -2,66 +2,117 @@ package bll.entities;
 
 import bll.enumerators.EOperationType;
 import bll.enumerators.ERepetitionFrequency;
-import bll.exceptions.AmountEqualZeroException;
-import bll.exceptions.InvalidDescriptionSizeException;
-import bll.exceptions.InvalidNameSizeException;
-import bll.exceptions.NullArgumentException;
+import bll.exceptions.*;
 import bll.valueObjects.IAttachment;
 
+import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.time.YearMonth;
+import java.util.*;
 
 import static bll.enumerators.EOperationType.*;
 import static bll.enumerators.ERepetitionFrequency.NONE;
 
-public class Movement extends Operation implements IMovement {
+@Entity
+public class Movement implements IMovement {
 
+    @Id
+    private UUID ID;
+    @Column(nullable = false, length = MAXIMUM_NAME_SIZE)
+    private String name;
+    @Column(nullable = false, length = MAXIMUM_DESCRIPTION_SIZE)
+    private String description;
+    @Column(nullable = false)
+    private BigDecimal amount;
+    @Column(nullable = false)
+    private LocalDate dueDate;
+    @JoinColumn(nullable = false)
+    @OneToOne(targetEntity = FormOfPayment.class)
+    private IFormOfPayment formOfPayment;
+    @JoinColumn(nullable = false)
+    @OneToOne(targetEntity = Payee.class)
+    private IPayee payee;
+    @JoinColumn(nullable = false)
+    @OneToOne(targetEntity = MovementCategory.class)
+    private IMovementCategory category;
+    @ElementCollection
+    private Set<IAttachment> attachments;
+    @Column(nullable = false)
+    @Enumerated
     private EOperationType MovementType;
+    @Column(nullable = false)
+    @Enumerated
     private ERepetitionFrequency frequency;
+    @Column(nullable = false)
     private UUID groupID;
+    private boolean accomplished;
+    private LocalDate accomplishDate;
+    @Column(nullable = false)
+    private LocalDate registrationDate;
+    private boolean active;
 
     public Movement(String name, String description, BigDecimal amount, LocalDate dueDate,
-                    IFormOfPayment formOfPayment, IPayee payee, ITransactionCategory category,
+                    IFormOfPayment formOfPayment, IPayee payee, IMovementCategory category,
                     Set<IAttachment> attachments, EOperationType MovementType,
                     ERepetitionFrequency frequency, UUID groupID) {
-        super(name, description, amount, dueDate, formOfPayment, payee, category, attachments);
-        if (MovementType == null || frequency == null)
+        if (name == null || description == null || amount == null || dueDate == null ||
+                formOfPayment == null || payee == null || category == null ||
+                attachments == null || MovementType == null || frequency == null)
             throw new NullArgumentException();
 
-        if (frequency == NONE){
+
+        if (INCORRECT_NAME_SIZE.test(name.trim()))
+            throw new InvalidNameSizeException();
+        if (INCORRECT_DESCRIPTION_SIZE.test(description.trim()))
+            throw new InvalidDescriptionSizeException();
+        if (AMOUNT_IS_ZERO.test(amount))
+            throw new AmountEqualZeroException();
+
+        this.ID = UUID.randomUUID();
+
+        if (frequency == NONE) {
             if (groupID == null)
                 this.groupID = this.ID;
             else
                 this.groupID = groupID;
-        }else {
+        } else {
             this.groupID = this.ID;
         }
+        this.name = name;
+        this.description = description;
+        this.amount = amount;
+        this.dueDate = dueDate;
+        this.formOfPayment = formOfPayment;
+        this.payee = payee;
+        this.category = category;
+        this.attachments = new HashSet<>();
+        this.attachments.addAll(attachments);
 
         this.MovementType = MovementType;
         this.frequency = frequency;
+        this.accomplished = false;
+        this.registrationDate = LocalDate.now();
+        this.active = true;
         normalizesAmount();
     }
 
 
     public Movement(String name, BigDecimal amount, LocalDate dueDate,
-                    IFormOfPayment formOfPayment, IPayee payee, ITransactionCategory category,
+                    IFormOfPayment formOfPayment, IPayee payee, IMovementCategory category,
                     EOperationType MovementType) {
         this(name, EMPTY_DESCRIPTION, amount, dueDate, formOfPayment, payee, category, new HashSet<>(), MovementType, NONE, null);
 
     }
 
     public Movement(String name, BigDecimal amount, LocalDate dueDate,
-                    IFormOfPayment formOfPayment, IPayee payee, ITransactionCategory category,
+                    IFormOfPayment formOfPayment, IPayee payee, IMovementCategory category,
                     EOperationType MovementType,
                     ERepetitionFrequency frequency, UUID groupID) {
         this(name, EMPTY_DESCRIPTION, amount, dueDate, formOfPayment, payee, category, new HashSet<>(), MovementType, frequency, groupID);
     }
 
-    public Movement(IMovement movement) {
+    private Movement(IMovement movement) {
         if (movement == null)
             throw new NullArgumentException();
 
@@ -78,8 +129,260 @@ public class Movement extends Operation implements IMovement {
         this.groupID = movement.getGroupID();
         this.MovementType = movement.isCredit() ? CREDIT : DEBIT;
         this.frequency = movement.getRepetitionFrequency();
+        this.accomplished = movement.isAccomplished();
+        this.registrationDate = movement.getRegistrationDate();
+        this.accomplishDate = movement.getAccomplishDate();
     }
 
+
+    /**
+     * Returns the unique identifier of the Movement.
+     *
+     * @return the unique identifier of the Movement.
+     */
+    @Override
+    public UUID getID() {
+        return this.ID;
+    }
+
+    /**
+     * Returns the name of the Operation.
+     *
+     * @return the name of the Operation.
+     */
+    @Override
+    public String getName() {
+        return this.name;
+    }
+
+    /**
+     * Returns the monetary value of the movement.
+     *
+     * @return the monetary value of the movement.
+     */
+    @Override
+    public BigDecimal getAmount() {
+        return this.amount;
+    }
+
+    /**
+     * Returns the due date of the movement.
+     *
+     * @return the due date of the movement.
+     */
+    @Override
+    public LocalDate getDueDate() {
+        return this.dueDate;
+    }
+
+    /**
+     * Returns the accomplish date.
+     * <p>
+     * It may be {@code null} if the movement is not yet accomplished.
+     *
+     * @return the accomplish date.
+     */
+    @Override
+    public LocalDate getAccomplishDate() {
+        return this.accomplishDate;
+    }
+
+    /**
+     * Returns the date of registration of the movement.
+     *
+     * @return the date of registration of the movement.
+     */
+    @Override
+    public LocalDate getRegistrationDate() {
+        return this.registrationDate;
+    }
+
+    /**
+     * Returns the reference (month / year) of the movement.
+     *
+     * @return the reference (month / year) of the movement.
+     */
+    @Override
+    public YearMonth getReference() {
+        return YearMonth.of(this.dueDate.getYear(), this.dueDate.getMonth());
+    }
+
+    /**
+     * Returns the description of the movement.
+     *
+     * @return the description of the movement.
+     */
+    @Override
+    public String getDescription() {
+        return this.description;
+    }
+
+    /**
+     * Returns the payee of the movement.
+     *
+     * @return the payee of the movement.
+     */
+    @Override
+    public IPayee getPayee() {
+        return this.payee.clone();
+    }
+
+    /**
+     * Returns the category of the movement.
+     *
+     * @return the category of the movement.
+     */
+    @Override
+    public IMovementCategory getCategory() {
+        return this.category.clone();
+    }
+
+    /**
+     * Returns the payment method of the transaction.
+     *
+     * @return the payment method of the transaction.
+     */
+    @Override
+    public IFormOfPayment getFormOfPayment() {
+        return this.formOfPayment.clone();
+    }
+
+    /**
+     * Returns a collection of movement attachments.
+     *
+     * @return a collection of movement attachments.
+     */
+    @Override
+    public Set<IAttachment> getAttachments() {
+        return Collections.unmodifiableSet(this.attachments);
+    }
+
+    /**
+     * Adds an attachment to the operation.
+     *
+     * @param newAttachment an attachment.
+     * @throws NullArgumentException if the argument is null.
+     */
+    @Override
+    public void addAttachment(IAttachment newAttachment) {
+        if (newAttachment == null)
+            throw new NullArgumentException();
+        this.attachments.add(newAttachment);
+    }
+
+    /**
+     * Remove an attachment to the operation.
+     *
+     * @param attachment an existing attachment in the operation.
+     * @throws NullArgumentException           if the argument is null.
+     * @throws AttachmentDoesNotExistException if the attachment does not exist in the operation.
+     */
+    @Override
+    public void removeAttachment(IAttachment attachment) {
+        if (attachment == null)
+            throw new NullArgumentException();
+        if (this.attachments == null || !this.attachments.contains(attachment))
+            throw new AttachmentDoesNotExistException();
+        this.attachments.remove(attachment);
+    }
+
+    /**
+     * Inactivates a movement, it is the equivalent of deleting a movement.
+     */
+    @Override
+    public void inactivate() {
+        this.active = false;
+    }
+
+    /**
+     * Returns if {@code true} if a movement is active, that is, not deleted.
+     *
+     * @return if {@code true} if a movement is active, that is, not deleted.
+     */
+    @Override
+    public boolean isActive() {
+        return this.active;
+    }
+
+    /**
+     * Returns if {@code true} if a movement is inactive, that is, deleted.
+     *
+     * @return if {@code true} if a movement is inactive, that is, deleted.
+     */
+    @Override
+    public boolean isInactive() {
+        return !this.active;
+    }
+
+    /**
+     * Returns if the movement is of the debit type.
+     * A debit is a operation less that zero.
+     *
+     * @return {@code true} if the movement is of the debit type.
+     */
+    @Override
+    public boolean isDebit() {
+        return (this.amount.compareTo(BigDecimal.ZERO) < 0);
+    }
+
+    /**
+     * Returns if the movement is of the credit type.
+     * A credit is a operation greater that zero.
+     *
+     * @return {@code true} if the movement is of the credit type.
+     */
+    @Override
+    public boolean isCredit() {
+        return (this.amount.compareTo(BigDecimal.ZERO) > 0);
+    }
+
+    @Override
+    public String toString() {
+        return "Operation{" +
+                "ID=" + ID +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", amount=" + amount +
+                ", dueDate=" + dueDate +
+                ", formOfPayment=" + formOfPayment +
+                ", payee=" + payee +
+                ", category=" + category +
+                ", attachments=" + attachments +
+                '}';
+    }
+
+
+    /**
+     * Makes the movement accomplished.
+     */
+    @Override
+    public void accomplish() {
+        accomplish(LocalDate.now());
+    }
+
+    /**
+     * Makes the movement accomplished.
+     *
+     * @param accomplishDate from occurrence.
+     * @throws NullArgumentException if the argument is null.
+     */
+    @Override
+    public void accomplish(LocalDate accomplishDate) {
+        if (accomplishDate == null)
+            throw new NullArgumentException();
+        this.accomplished = true;
+        this.accomplishDate = accomplishDate;
+    }
+
+    /**
+     * Returns whether the movement was accomplished.
+     *
+     * @return {@code true} whether the movement was accomplished.
+     */
+    @Override
+    public boolean isAccomplished() {
+        return this.accomplished;
+    }
 
     /**
      * Updates the movement value.
@@ -156,7 +459,7 @@ public class Movement extends Operation implements IMovement {
      * @throws NullArgumentException if the argument is null.
      */
     @Override
-    public void updateCategory(ITransactionCategory newCategory) {
+    public void updateCategory(IMovementCategory newCategory) {
         if (newCategory == null)
             throw new NullArgumentException();
         this.category = newCategory;
@@ -234,6 +537,7 @@ public class Movement extends Operation implements IMovement {
      *
      * @return the frequency of repetition of the movement.
      */
+    @Transient
     @Override
     public ERepetitionFrequency getRepetitionFrequency() {
         return this.frequency;
@@ -247,6 +551,7 @@ public class Movement extends Operation implements IMovement {
      *
      * @return {@code true} if it is a recurring movement.
      */
+    @Transient
     @Override
     public boolean isRecurrent() {
         return this.frequency != NONE && groupID.equals(ID);
@@ -259,6 +564,7 @@ public class Movement extends Operation implements IMovement {
      *
      * @return {@code true} if it is a installment movement.
      */
+    @Transient
     @Override
     public boolean isInstallment() {
         return this.frequency == NONE && !groupID.equals(ID);
@@ -271,6 +577,7 @@ public class Movement extends Operation implements IMovement {
      *
      * @return {@code true} if it is a common movement.
      */
+    @Transient
     @Override
     public boolean isCommonMovement() {
         return this.frequency == NONE && groupID.equals(ID);
@@ -288,21 +595,29 @@ public class Movement extends Operation implements IMovement {
     public boolean isDeepEquals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        if (!super.isDeepEquals(o)) return false;
         Movement movement = (Movement) o;
-        return MovementType == movement.MovementType && frequency == movement.frequency && groupID.equals(movement.groupID);
+        return accomplished == movement.accomplished && ID.equals(movement.ID) && name.equals(movement.name) &&
+                description.equals(movement.description) && amount.equals(movement.amount) &&
+                dueDate.equals(movement.dueDate) && formOfPayment.equals(movement.formOfPayment) &&
+                payee.equals(movement.payee) && category.equals(movement.category) &&
+                attachments.equals(movement.attachments) && MovementType == movement.MovementType &&
+                frequency == movement.frequency && groupID.equals(movement.groupID) &&
+                Objects.equals(accomplishDate, movement.accomplishDate) &&
+                registrationDate.equals(movement.registrationDate);
     }
+
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        return super.equals(o);
+        Movement movement = (Movement) o;
+        return ID.equals(movement.ID);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode());
+        return 31 * Objects.hash(ID);
     }
 
     /**
@@ -315,37 +630,79 @@ public class Movement extends Operation implements IMovement {
         return new Movement(this);
     }
 
+    /**
+     * Compares this object with the specified object for order.  Returns a
+     * negative integer, zero, or a positive integer as this object is less
+     * than, equal to, or greater than the specified object.
+     *
+     * <p>The implementor must ensure
+     * {@code sgn(x.compareTo(y)) == -sgn(y.compareTo(x))}
+     * for all {@code x} and {@code y}.  (This
+     * implies that {@code x.compareTo(y)} must throw an exception iff
+     * {@code y.compareTo(x)} throws an exception.)
+     *
+     * <p>The implementor must also ensure that the relation is transitive:
+     * {@code (x.compareTo(y) > 0 && y.compareTo(z) > 0)} implies
+     * {@code x.compareTo(z) > 0}.
+     *
+     * <p>Finally, the implementor must ensure that {@code x.compareTo(y)==0}
+     * implies that {@code sgn(x.compareTo(z)) == sgn(y.compareTo(z))}, for
+     * all {@code z}.
+     *
+     * <p>It is strongly recommended, but <i>not</i> strictly required that
+     * {@code (x.compareTo(y)==0) == (x.equals(y))}.  Generally speaking, any
+     * class that implements the {@code Comparable} interface and violates
+     * this condition should clearly indicate this fact.  The recommended
+     * language is "Note: this class has a natural ordering that is
+     * inconsistent with equals."
+     *
+     * <p>In the foregoing description, the notation
+     * {@code sgn(}<i>expression</i>{@code )} designates the mathematical
+     * <i>signum</i> function, which is defined to return one of {@code -1},
+     * {@code 0}, or {@code 1} according to whether the value of
+     * <i>expression</i> is negative, zero, or positive, respectively.
+     *
+     * @param o the object to be compared.
+     * @return a negative integer, zero, or a positive integer as this object
+     * is less than, equal to, or greater than the specified object.
+     * @throws NullPointerException if the specified object is null
+     * @throws ClassCastException   if the specified object's type prevents it
+     *                              from being compared to this object.
+     */
     @Override
-    public String toString() {
-        return "Movement{" +
-                "MovementType=" + MovementType +
-                ", frequency=" + frequency +
-                ", groupID=" + groupID +
-                ", ID=" + ID +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", amount=" + amount +
-                ", dueDate=" + dueDate +
-                ", formOfPayment=" + formOfPayment +
-                ", payee=" + payee +
-                ", category=" + category +
-                ", attachments=" + attachments +
-                '}';
+    public int compareTo(IMovement o) {
+        return this.getDueDate().compareTo(o.getDueDate());
     }
 
-    @SuppressWarnings("unused")
-    private Movement() {
-    }
-
-    @SuppressWarnings("unused")
-    private void setID(UUID ID) {
-        this.ID = ID;
+    protected Movement() {
     }
 
     @SuppressWarnings("unused")
     private void setGroupID(UUID groupID) {
         this.groupID = groupID;
     }
+
+
+    @SuppressWarnings("unused")
+    private void setMovementType(EOperationType movementType) {
+        this.MovementType = movementType;
+    }
+
+    @SuppressWarnings("unused")
+    private void setFrequency(ERepetitionFrequency frequency) {
+        this.frequency = frequency;
+    }
+
+    @SuppressWarnings("unused")
+    private EOperationType getMovementType() {
+        return MovementType;
+    }
+
+    @SuppressWarnings("unused")
+    private ERepetitionFrequency getFrequency() {
+        return frequency;
+    }
+
 
     @SuppressWarnings("unused")
     private void setName(String name) {
@@ -378,7 +735,7 @@ public class Movement extends Operation implements IMovement {
     }
 
     @SuppressWarnings("unused")
-    private void setCategory(ITransactionCategory category) {
+    private void setCategory(IMovementCategory category) {
         this.category = category;
     }
 
@@ -388,13 +745,8 @@ public class Movement extends Operation implements IMovement {
     }
 
     @SuppressWarnings("unused")
-    private void setMovementType(EOperationType movementType) {
-        this.MovementType = movementType;
-    }
-
-    @SuppressWarnings("unused")
-    private void setFrequency(ERepetitionFrequency frequency) {
-        this.frequency = frequency;
+    private void setID(UUID ID) {
+        this.ID = ID;
     }
 
     private void normalizesAmount() {

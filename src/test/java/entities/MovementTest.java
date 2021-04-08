@@ -9,9 +9,12 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.YearMonth;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
-import static bll.entities.IOperation.COMPARE_FOR_AMOUNT;
+import static bll.entities.IMovement.COMPARE_FOR_AMOUNT;
 import static bll.enumerators.EOperationType.CREDIT;
 import static bll.enumerators.EOperationType.DEBIT;
 import static bll.enumerators.ERepetitionFrequency.*;
@@ -20,8 +23,8 @@ import static org.junit.jupiter.api.Assertions.*;
 public class MovementTest {
     IPayee payee = new Payee("Continent");
     IFormOfPayment formOfPayment = new FormOfPayment("MB Way");
-    ITransactionCategory category1 = new TransactionCategory("Mercado");
-    ITransactionCategory category2 = new TransactionCategory("Education");
+    IMovementCategory category1 = new MovementCategory("Mercado");
+    IMovementCategory category2 = new MovementCategory("Education");
 
     IMovement obj1 = new Movement("Christmas shopping",
             new BigDecimal("33.50"),
@@ -92,6 +95,44 @@ public class MovementTest {
                 category1, CREDIT, WEEKLY, UUID.randomUUID());
 
         assertEquals(movement1.getRepetitionFrequency(), WEEKLY);
+    }
+
+    @Test
+    public void shouldToBeActive(){
+        assertTrue(obj1.isActive());
+        assertFalse(obj1.isInactive());
+    }
+
+    @Test
+    public void shouldInactivateAMovement(){
+        obj1.inactivate();
+        assertTrue(obj1.isInactive());
+        assertFalse(obj1.isActive());
+    }
+
+    @Test
+    public void shouldHaveRegistrationDate(){
+        assertEquals(obj1.getRegistrationDate(), LocalDate.now());
+        assertEquals(obj2.getRegistrationDate(), LocalDate.now());
+    }
+
+    @Test
+    public void shouldHaveNullAccomplishDate(){
+        assertNull(obj1.getAccomplishDate());
+        assertNull(obj2.getAccomplishDate());
+    }
+
+    @Test
+    public void shouldHaveAccomplishDate(){
+        obj1.accomplish();
+        assertEquals(LocalDate.now(), obj1.getAccomplishDate());
+        obj2.accomplish(LocalDate.of(1970, Month.FEBRUARY, 2));
+        assertEquals(LocalDate.of(1970, Month.FEBRUARY, 2), obj2.getAccomplishDate());
+    }
+
+    @Test
+    public void shouldThrowExceptionByTryAccomplishWithNullDate(){
+        assertThrows(NullArgumentException.class, ()-> obj1.accomplish(null));
     }
 
     @Test
@@ -232,8 +273,8 @@ public class MovementTest {
 
     @Test
     public void shouldBeEquals() {
-        IMovement obj3 = new Movement(obj1);
-        IMovement obj4 = new Movement(obj3);
+        IMovement obj3 = obj1.clone();
+        IMovement obj4 = obj3.clone();
         obj3.updateMovementType(DEBIT);
         obj4.updateName("Travel");
         assertEquals(obj1, obj3);
@@ -243,8 +284,8 @@ public class MovementTest {
 
     @Test
     public void shouldBeDeepEquals() {
-        IMovement obj3 = new Movement(obj1);
-        IMovement obj4 = new Movement(obj3);
+        IMovement obj3 = obj1.clone();
+        IMovement obj4 = obj3.clone();
         assertTrue(obj1.isDeepEquals(obj3));
         assertTrue(obj3.isDeepEquals(obj4));
         assertTrue(obj1.isDeepEquals(obj4));

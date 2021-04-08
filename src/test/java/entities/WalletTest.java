@@ -26,8 +26,8 @@ public class WalletTest {
             Currency.getInstance(Locale.getDefault()), Collections.singleton(formOfPayment1), payeeFormat);
     IPayee payee = new Payee("Continent");
     IFormOfPayment formOfPayment2 = new FormOfPayment("Transfer");
-    ITransactionCategory category1 = new TransactionCategory("Mercado");
-    ITransactionCategory category2 = new TransactionCategory("Education");
+    IMovementCategory category1 = new MovementCategory("Mercado");
+    IMovementCategory category2 = new MovementCategory("Education");
     IMovement movement1 = new Movement("Christmas shopping",
             new BigDecimal("33.50"),
             LocalDate.now(),
@@ -106,10 +106,7 @@ public class WalletTest {
                         "shouldThrowExceptionByBiggerDescription shouldThrowExceptionByBiggerDescription"));
     }
 
-    @Test
-    public void shouldThrowExceptionByNullWallet() {
-        assertThrows(NullArgumentException.class, () -> new Wallet(null));
-    }
+
 
     @Test
     public void shouldThrowExceptionByNullDescription() {
@@ -209,6 +206,13 @@ public class WalletTest {
     }
 
     @Test
+    public void shouldThrowExceptionByTryAddAAccomplishedMovement(){
+        movement2.accomplish();
+        assertThrows(MovementAlreadyAccomplishException.class, ()-> obj1.addMovement(movement2));
+    }
+
+
+    @Test
     public void shouldAddAMovement() {
         assertTrue(obj1.getMonthOperations().isEmpty());
         assertTrue(obj1.getMovements().isEmpty());
@@ -218,6 +222,19 @@ public class WalletTest {
 
         assertEquals(1, obj1.getMovements().size());
         assertTrue(obj1.getMovements().contains(movement1));
+    }
+
+    @Test
+    public void shouldThrowExceptionByTryRemoveAAccomplishedMovementOutside(){
+        obj1.addMovement(movement2);
+        movement2.accomplish();
+        assertThrows(MovementAlreadyAccomplishException.class, ()-> obj1.removeMovement(movement2));
+    }
+    @Test
+    public void shouldThrowExceptionByTryRemoveAAccomplishedMovementInside(){
+        obj1.addMovement(movement2);
+        obj1.confirmMovement(movement2);
+        assertThrows(MovementAlreadyAccomplishException.class, ()-> obj1.removeMovement(movement2));
     }
 
     @Test
@@ -369,6 +386,20 @@ public class WalletTest {
     }
 
     @Test
+    public void shouldThrowExceptionByTryConfirmMovementAccomplishedOut(){
+        obj1.addMovement(movement2);
+        movement2.accomplish();
+        assertThrows(MovementAlreadyAccomplishException.class, ()-> obj1.confirmMovement(movement2));
+    }
+
+    @Test
+    public void shouldThrowExceptionByTryConfirmMovementAccomplishedInside(){
+        obj1.addMovement(movement2);
+        obj1.confirmMovement(movement2);
+        assertThrows(MovementAlreadyAccomplishException.class, ()-> obj1.confirmMovement(movement2));
+    }
+
+    @Test
     public void shouldConfirmAMovement() {
         obj1.addMovement(movement1);
         obj1.addMovement(movement2);
@@ -395,22 +426,25 @@ public class WalletTest {
         obj1.addMovement(movement2);
         obj1.confirmMovement(movement2);
         obj1.confirmMovement(movement1);
-        assertEquals(BigDecimal.ZERO, obj1.getCashInflow());
-        assertEquals(BigDecimal.ZERO, obj1.getCashInflowInYear());
-        assertEquals(movement2.getAmount(), obj1.getCashInflow(YearMonth.of(1970, 1)));
-        assertEquals(movement2.getAmount(), obj1.getCashInflowInYear(Year.of(1970)));
+        assertEquals(movement2.getAmount(), obj1.getCashInflow());
+        assertEquals(movement2.getAmount(), obj1.getCashInflowInYear());
+        assertEquals(BigDecimal.ZERO, obj1.getCashInflow(YearMonth.of(1970, 1)));
+        assertEquals(BigDecimal.ZERO, obj1.getCashInflowInYear(Year.of(1970)));
     }
 
     @Test
     public void shouldHaveTheCorrectCashInFlowExpected() {
         obj1.addMovement(movement1);
         obj1.addMovement(movement2);
+        assertEquals(BigDecimal.ZERO, obj1.getCashInflowInYear());
+        assertEquals(BigDecimal.ZERO, obj1.getCashInflow());
         obj1.confirmMovement(movement2);
         obj1.confirmMovement(movement1);
-        assertEquals(BigDecimal.ZERO, obj1.getCashInflow());
-        assertEquals(BigDecimal.ZERO, obj1.getCashInflowInYear());
-        assertEquals(movement2.getAmount(), obj1.getCashInflow(YearMonth.of(1970, 1)));
-        assertEquals(movement2.getAmount(), obj1.getCashInflowInYear(Year.of(1970)));
+
+        assertEquals(movement2.getAmount(), obj1.getCashInflowExpected(YearMonth.of(1970, 1)));
+        assertEquals(BigDecimal.ZERO, obj1.getCashInflow(YearMonth.of(1970, 1)));
+        assertEquals(movement2.getAmount(), obj1.getCashInflowInYearExpected(Year.of(1970)));
+        assertEquals(BigDecimal.ZERO, obj1.getCashInflowInYear(Year.of(1970)));
     }
 
     @Test

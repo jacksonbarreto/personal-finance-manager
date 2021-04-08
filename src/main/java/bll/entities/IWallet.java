@@ -6,6 +6,7 @@ import bll.exceptions.*;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.Year;
 import java.time.YearMonth;
 import java.util.Comparator;
@@ -76,6 +77,7 @@ public interface IWallet extends Serializable, Comparable<IWallet>, Cloneable {
      * @throws ExistingMovementException     if the movement already exists.
      * @throws IllegalFormOfPaymentException if the form of payment does not exist in the wallet.
      * @throws InstallmentForbiddenException if you try to add an installment.
+     *  @throws MovementAlreadyAccomplishException If the movement is already accomplished.
      */
     void addMovement(IMovement movement);
 
@@ -89,6 +91,7 @@ public interface IWallet extends Serializable, Comparable<IWallet>, Cloneable {
      * @throws ExistingMovementException           if the movement already exists.
      * @throws DontIsInstallmentException          if the movement is not an installment plan.
      * @throws IllegalInstallmentQuantityException if the number of plots is less than 2.
+     *  @throws MovementAlreadyAccomplishException If the movement is already accomplished.
      */
     void addInstallment(IMovement movement, ERepetitionFrequency frequency, int numberOfInstallments);
 
@@ -99,6 +102,7 @@ public interface IWallet extends Serializable, Comparable<IWallet>, Cloneable {
      * @throws NullArgumentException          if the argument is null.
      * @throws NonExistentMovementException   if the movement does not exist in the wallet.
      * @throws InstallmentWithoutHandlingMode if the movement is in installments.
+     * @throws MovementAlreadyAccomplishException If the movement is already accomplished.
      */
     void removeMovement(IMovement movement);
 
@@ -110,6 +114,7 @@ public interface IWallet extends Serializable, Comparable<IWallet>, Cloneable {
      * @throws NullArgumentException        if the argument is null.
      * @throws NonExistentMovementException if the movement does not exist in the wallet.
      * @throws DontIsInstallmentException   if the movement is not an installment plan.
+     * @throws MovementAlreadyAccomplishException If the movement is already accomplished.
      */
     void removeInstallment(IMovement installment, EHandlingMode handlingMode);
 
@@ -121,8 +126,22 @@ public interface IWallet extends Serializable, Comparable<IWallet>, Cloneable {
      * @throws NonExistentMovementException  if the movement does not exist in the wallet.
      * @throws IllegalFormOfPaymentException if the form of payment does not exist in the wallet.
      * @throws InsufficientFundsException    if the wallet does not have funds to support this transaction.
+     * @throws MovementAlreadyAccomplishException If the movement is already accomplished.
      */
     void confirmMovement(IMovement movement);
+
+    /**
+     * Confirms a movement in the wallet, turning it into a transaction.
+     *
+     * @param movement to be confirmed.
+     * @param accomplishDate to be confirmed.
+     * @throws NullArgumentException         if the argument is null.
+     * @throws NonExistentMovementException  if the movement does not exist in the wallet.
+     * @throws IllegalFormOfPaymentException if the form of payment does not exist in the wallet.
+     * @throws InsufficientFundsException    if the wallet does not have funds to support this transaction.
+     * @throws MovementAlreadyAccomplishException If the movement is already accomplished.
+     */
+    void confirmMovement(IMovement movement, LocalDate accomplishDate);
 
     /**
      * Adds a new payment method to the wallet.
@@ -204,14 +223,14 @@ public interface IWallet extends Serializable, Comparable<IWallet>, Cloneable {
      *
      * @return a collection of all transactions in the wallet.
      */
-    Set<ITransaction> getTransactions();
+    Set<IMovement> getTransactions();
 
     /**
      * Returns a collection of Operation for the current month/year.
      *
      * @return a collection of Operation for the current month.
      */
-    Set<IOperation> getMonthOperations();
+    Set<IMovement> getMonthOperations();
 
     /**
      * Returns a collection of Operation from the reference.
@@ -220,14 +239,14 @@ public interface IWallet extends Serializable, Comparable<IWallet>, Cloneable {
      * @return a collection of Operation from the reference.
      * @throws NullArgumentException if the argument is null.
      */
-    Set<IOperation> getMonthOperations(YearMonth reference);
+    Set<IMovement> getMonthOperations(YearMonth reference);
 
     /**
      * Returns a collection of Operation for the current year.
      *
      * @return a collection of Operation for the current year.
      */
-    Set<IOperation> getYearOperations();
+    Set<IMovement> getYearOperations();
 
     /**
      * Returns a collection of Operation for a year.
@@ -236,7 +255,7 @@ public interface IWallet extends Serializable, Comparable<IWallet>, Cloneable {
      * @return a collection of Operation for a year.
      * @throws NullArgumentException if the argument is null.
      */
-    Set<IOperation> getYearOperations(Year year);
+    Set<IMovement> getYearOperations(Year year);
 
     /**
      * Returns a collection of operations that occurred in the requested range.
@@ -246,7 +265,7 @@ public interface IWallet extends Serializable, Comparable<IWallet>, Cloneable {
      * @return a collection of operations that occurred in the requested range.
      * @throws NullArgumentException if the argument is null.
      */
-    Set<IOperation> getOperationsBetween(YearMonth start, YearMonth end);
+    Set<IMovement> getOperationsBetween(YearMonth start, YearMonth end);
 
 
     /**
@@ -266,14 +285,14 @@ public interface IWallet extends Serializable, Comparable<IWallet>, Cloneable {
     BigDecimal getBalance(YearMonth reference);
 
     /**
-     * Returns the total amount of credit transactions in the current month.
+     * Returns the total amount of credit transactions, filtered by their date of accomplish, in the current month.
      *
      * @return the total amount of credit transactions in the current month.
      */
     BigDecimal getCashInflow();
 
     /**
-     * Returns the total value of credit transactions in the month / year.
+     * Returns the total value of credit transactions, filtered by their date of accomplish, in the month / year.
      *
      * @param reference month / year.
      * @return the total value of credit transactions in the month / year.
@@ -282,78 +301,78 @@ public interface IWallet extends Serializable, Comparable<IWallet>, Cloneable {
     BigDecimal getCashInflow(YearMonth reference);
 
     /**
-     * Returns the total amount of credit transactions in the current year.
+     * Returns the total amount of credit transactions, filtered by their date of accomplish, in the current year.
      *
-     * @return the total amount of credit transactions in the current year.
+     * @return the total amount of credit transactions, filtered by their date of accomplish, in the current year.
      */
     BigDecimal getCashInflowInYear();
 
     /**
-     * Returns the total value of credit transactions in the year.
+     * Returns the total value of credit transactions, filtered by their date of accomplish, in the year.
      *
      * @param year year for calculation.
-     * @return the total value of credit transactions in the year.
+     * @return the total value of credit transactions, filtered by their date of accomplish, in the year.
      * @throws NullArgumentException if the argument is null.
      */
     BigDecimal getCashInflowInYear(Year year);
 
     /**
-     * Returns the total amount of debit transactions in the current month.
+     * Returns the total amount of debit transactions, filtered by their date of accomplish, in the current month.
      *
-     * @return the total amount of debit transactions in the current month.
+     * @return the total amount of debit transactions, filtered by their date of accomplish, in the current month.
      */
     BigDecimal getCashOutflow();
 
     /**
-     * Returns the total value of debit transactions in the month / year.
+     * Returns the total value of debit transactions, filtered by their date of accomplish, in the month / year.
      *
      * @param reference month / year.
-     * @return the total value of debit transactions in the month / year.
+     * @return the total value of debit transactions, filtered by their date of accomplish, in the month / year.
      * @throws NullArgumentException if the argument is null.
      */
     BigDecimal getCashOutflow(YearMonth reference);
 
     /**
-     * Returns the total amount of debit transactions in the current year.
+     * Returns the total amount of debit transactions, filtered by their date of accomplish, in the current year.
      *
-     * @return the total amount of debit transactions in the current year.
+     * @return the total amount of debit transactions, filtered by their date of accomplish, in the current year.
      */
     BigDecimal getCashOutflowInYear();
 
     /**
-     * Returns the total value of debit transactions in the year.
+     * Returns the total value of debit transactions, filtered by their date of accomplish, in the year.
      *
      * @param year year for calculation.
-     * @return the total value of debit transactions in the year.
+     * @return the total value of debit transactions, filtered by their date of accomplish, in the year.
      * @throws NullArgumentException if the argument is null.
      */
     BigDecimal getCashOutflowInYear(Year year);
 
     /**
-     * Returns the current balance expected (transactions + movement).
+     * Returns the current balance expected only movement, filtered by their due date.
      *
-     * @return the current balance expected (transactions + movement).
+     * @return the current balance expected only movement, filtered by their due date.
      */
     BigDecimal getBalanceExpected();
 
     /**
-     * Returns the reference balance expected (transactions + movement).
+     * Returns the reference balance expected only movement, filtered by their due date.
      *
      * @param reference month / year.
-     * @return the reference balance expected (transactions + movement).
+     * @return the reference balance expected only movement, filtered by their due date.
      * @throws NullArgumentException if the argument is null.
      */
     BigDecimal getBalanceExpected(YearMonth reference);
 
     /**
-     * Returns the total amount of credit transactions and movement in the current month.
+     * Returns the total amount of credit movement, filtered by their due date, in the current month.
      *
      * @return the total amount of credit transactions and movement in the current month.
      */
     BigDecimal getCashInflowExpected();
 
     /**
-     * Returns the total value of credit transactions and movement in the month / year.
+     * Returns the total value of credit movement, filtered by their due date,  in the month / year.
      *
      * @param reference month / year.
      * @return the total value of credit transactions and movement in the month / year.
@@ -362,14 +381,14 @@ public interface IWallet extends Serializable, Comparable<IWallet>, Cloneable {
     BigDecimal getCashInflowExpected(YearMonth reference);
 
     /**
-     * Returns the total amount of credit transactions and movement in the current year.
+     * Returns the total amount of credit movement, filtered by their due date, in the current year.
      *
-     * @return the total amount of credit transactions and movement in the current year.
+     * @return the total amount of credit movement, filtered by their due date, in the current year.
      */
     BigDecimal getCashInflowInYearExpected();
 
     /**
-     * Returns the total value of credit transactions and movement in the year.
+     * Returns the total value of credit movement, filtered by their due date, in the year.
      *
      * @param year year for calculation.
      * @return the total value of credit transactions and movement in the year.
@@ -378,33 +397,33 @@ public interface IWallet extends Serializable, Comparable<IWallet>, Cloneable {
     BigDecimal getCashInflowInYearExpected(Year year);
 
     /**
-     * Returns the total amount of debit transactions and movement in the current month.
+     * Returns the total amount of debit movement, filtered by their due date, in the current month.
      *
-     * @return the total amount of debit transactions and movement in the current month.
+     * @return the total amount of debit movement, filtered by their due date, in the current month.
      */
     BigDecimal getCashOutflowExpected();
 
     /**
-     * Returns the total value of debit transactions and movement in the month / year.
+     * Returns the total value of debit movement, filtered by their due date, the month / year.
      *
      * @param reference month / year.
-     * @return the total value of debit transactions and movement in the month / year.
+     * @return the total value of debit movement, filtered by their due date, in the month / year.
      * @throws NullArgumentException if the argument is null.
      */
     BigDecimal getCashOutflowExpected(YearMonth reference);
 
     /**
-     * Returns the total amount of debit transactions and movement in the current year.
+     * Returns the total amount of debit movement, filtered by their due date, in the current year.
      *
-     * @return the total amount of debit transactions and movement in the current year.
+     * @return the total amount of debit movement, filtered by their due date, in the current year.
      */
     BigDecimal getCashOutflowInYearExpected();
 
     /**
-     * Returns the total value of debit transactions and movement in the year.
+     * Returns the total value of debit movement, filtered by their due date, in the year.
      *
      * @param year year for calculation.
-     * @return the total value of debit transactions and movement in the year.
+     * @return the total value of debit movement, filtered by their due date, in the year.
      * @throws NullArgumentException if the argument is null.
      */
     BigDecimal getCashOutflowInYearExpected(Year year);

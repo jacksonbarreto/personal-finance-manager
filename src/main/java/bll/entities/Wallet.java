@@ -1,10 +1,13 @@
 package bll.entities;
 
+import bll.Factories.IMovementFactory;
 import bll.enumerators.EHandlingMode;
 import bll.enumerators.EOperationType;
 import bll.enumerators.ERepetitionFrequency;
 import bll.exceptions.*;
+import bll.valueObjects.IAttachment;
 
+import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Year;
@@ -12,14 +15,23 @@ import java.time.YearMonth;
 import java.util.*;
 import java.util.function.Predicate;
 
+@Entity
 public class Wallet implements IWallet {
+    @Id
     private UUID ID;
+    @Column(nullable = false, length = MAXIMUM_NAME_SIZE)
     private String name;
+    @Column(nullable = false, length = MAXIMUM_DESCRIPTION_SIZE)
     private String description;
+    @Column(nullable = false)
     private Currency currency;
+    @Column(nullable = false)
+    @ManyToMany(targetEntity = FormOfPayment.class)
     private Set<IFormOfPayment> formOfPayments;
+    @OneToMany(targetEntity = Movement.class)
     private Set<IMovement> movements;
-    private Set<ITransaction> transactions;
+    @JoinColumn(nullable = false)
+    @OneToOne(targetEntity = Payee.class)
     private IPayee payeeFormat;
 
     public Wallet(String name, String description, Currency currency,
@@ -40,7 +52,6 @@ public class Wallet implements IWallet {
         for (IFormOfPayment f : formOfPayments)
             this.formOfPayments.add(f.clone());
         this.movements = new TreeSet<>();
-        this.transactions = new TreeSet<>();
         this.payeeFormat = payeeFormat;
     }
 
@@ -49,8 +60,7 @@ public class Wallet implements IWallet {
                 new HashSet<>(Collections.singletonList(formOfPayment)), payeeFormat);
     }
 
-    @SuppressWarnings("unchecked")
-    public Wallet(IWallet wallet) {
+    private Wallet(IWallet wallet) {
         if (wallet == null)
             throw new NullArgumentException();
         this.ID = wallet.getID();
@@ -60,8 +70,7 @@ public class Wallet implements IWallet {
         this.formOfPayments = new HashSet<>();
         for (IFormOfPayment f : wallet.getFormOfPayment())
             this.formOfPayments.add(f.clone());
-        this.movements = (Set<IMovement>) copyOperations(wallet.getMovements());
-        this.transactions = (Set<ITransaction>) copyOperations(wallet.getTransactions());
+        this.movements = copyMovements(wallet.getMovements());
         this.payeeFormat = wallet.getPayeeFormat();
     }
 
@@ -135,10 +144,11 @@ public class Wallet implements IWallet {
      * Adds a new movement to the portfolio.
      *
      * @param movement a new movement to the portfolio.
-     * @throws NullArgumentException         if the argument is null.
-     * @throws ExistingMovementException     if the movement already exists.
-     * @throws IllegalFormOfPaymentException if the form of payment does not exist in the wallet.
-     * @throws InstallmentForbiddenException if you try to add an installment.
+     * @throws NullArgumentException              if the argument is null.
+     * @throws ExistingMovementException          if the movement already exists.
+     * @throws IllegalFormOfPaymentException      if the form of payment does not exist in the wallet.
+     * @throws InstallmentForbiddenException      if you try to add an installment.
+     * @throws MovementAlreadyAccomplishException If the movement is already accomplished.
      */
     @Override
     public void addMovement(IMovement movement) {
@@ -146,6 +156,8 @@ public class Wallet implements IWallet {
             throw new NullArgumentException();
         if (movement.isInstallment())
             throw new InstallmentForbiddenException();
+        if (movement.isAccomplished())
+            throw new MovementAlreadyAccomplishException();
         if (!formOfPayments.contains(movement.getFormOfPayment()))
             throw new IllegalFormOfPaymentException();
         if (movements.contains(movement))
@@ -163,6 +175,7 @@ public class Wallet implements IWallet {
      * @throws ExistingMovementException           if the movement already exists.
      * @throws DontIsInstallmentException          if the movement is not an installment plan.
      * @throws IllegalInstallmentQuantityException if the number of plots is less than 2.
+     * @throws MovementAlreadyAccomplishException  If the movement is already accomplished.
      */
     @Override
     public void addInstallment(IMovement movement, ERepetitionFrequency frequency, int numberOfInstallments) {
@@ -170,6 +183,8 @@ public class Wallet implements IWallet {
             throw new NullArgumentException();
         if (movements.contains(movement))
             throw new ExistingMovementException();
+        if (movement.isAccomplished())
+            throw new MovementAlreadyAccomplishException();
         if (!movement.isInstallment())
             throw new DontIsInstallmentException();
         if (numberOfInstallments < 2)
@@ -190,9 +205,10 @@ public class Wallet implements IWallet {
      * Removes a movement from the wallet.
      *
      * @param movement to be removed.
-     * @throws NullArgumentException          if the argument is null.
-     * @throws NonExistentMovementException   if the movement does not exist in the wallet.
-     * @throws InstallmentWithoutHandlingMode if the movement is in installments.
+     * @throws NullArgumentException              if the argument is null.
+     * @throws NonExistentMovementException       if the movement does not exist in the wallet.
+     * @throws InstallmentWithoutHandlingMode     if the movement is in installments.
+     * @throws MovementAlreadyAccomplishException If the movement is already accomplished.
      */
     @Override
     public void removeMovement(IMovement movement) {
@@ -200,6 +216,8 @@ public class Wallet implements IWallet {
             throw new NullArgumentException();
         if (!this.movements.contains(movement))
             throw new NonExistentMovementException();
+        if (movement.isAccomplished() || fetchMovement(movement).isAccomplished())
+            throw new MovementAlreadyAccomplishException();
         if (movement.isInstallment())
             throw new InstallmentWithoutHandlingMode();
         this.movements.remove(movement);
@@ -210,9 +228,10 @@ public class Wallet implements IWallet {
      *
      * @param installment  to be removed.
      * @param handlingMode How the removal should take place.
-     * @throws NullArgumentException        if the argument is null.
-     * @throws NonExistentMovementException if the movement does not exist in the wallet.
-     * @throws DontIsInstallmentException   if the movement is not an installment plan.
+     * @throws NullArgumentException              if the argument is null.
+     * @throws NonExistentMovementException       if the movement does not exist in the wallet.
+     * @throws DontIsInstallmentException         if the movement is not an installment plan.
+     * @throws MovementAlreadyAccomplishException If the movement is already accomplished.
      */
     @Override
     public void removeInstallment(IMovement installment, EHandlingMode handlingMode) {
@@ -222,7 +241,8 @@ public class Wallet implements IWallet {
             throw new DontIsInstallmentException();
         if (!this.movements.contains(installment))
             throw new NonExistentMovementException();
-
+        if (installment.isAccomplished())
+            throw new MovementAlreadyAccomplishException();
         updateOrDeleteMovement(installment, handlingMode, Action.REMOVE);
     }
 
@@ -230,33 +250,56 @@ public class Wallet implements IWallet {
      * Confirms a movement in the wallet, turning it into a transaction.
      *
      * @param movement to be confirmed.
-     * @throws NullArgumentException         if the argument is null.
-     * @throws NonExistentMovementException  if the movement does not exist in the wallet.
-     * @throws IllegalFormOfPaymentException if the form of payment does not exist in the wallet.
-     * @throws InsufficientFundsException    if the wallet does not have funds to support this transaction.
+     * @throws NullArgumentException              if the argument is null.
+     * @throws NonExistentMovementException       if the movement does not exist in the wallet.
+     * @throws IllegalFormOfPaymentException      if the form of payment does not exist in the wallet.
+     * @throws InsufficientFundsException         if the wallet does not have funds to support this transaction.
+     * @throws MovementAlreadyAccomplishException If the movement is already accomplished.
      */
     @Override
     public void confirmMovement(IMovement movement) {
+        confirmMovement(movement, LocalDate.now());
+    }
+
+    /**
+     * Confirms a movement in the wallet, turning it into a transaction.
+     *
+     * @param movement       to be confirmed.
+     * @param accomplishDate to be confirmed.
+     * @throws NullArgumentException              if the argument is null.
+     * @throws NonExistentMovementException       if the movement does not exist in the wallet.
+     * @throws IllegalFormOfPaymentException      if the form of payment does not exist in the wallet.
+     * @throws InsufficientFundsException         if the wallet does not have funds to support this transaction.
+     * @throws MovementAlreadyAccomplishException If the movement is already accomplished.
+     */
+    @Override
+    public void confirmMovement(IMovement movement, LocalDate accomplishDate) {
         if (movement == null)
             throw new NullArgumentException();
+
         if (!this.movements.contains(movement))
             throw new NonExistentMovementException();
         if (!this.formOfPayments.contains(movement.getFormOfPayment()))
             throw new IllegalFormOfPaymentException();
-        if (movement.getAmount().add(getBalanceInDate(movement.getDueDate())).compareTo(BigDecimal.ZERO) < 0 ||
-                movement.getAmount().add(getBalance(YearMonth.from(movement.getDueDate()))).compareTo(BigDecimal.ZERO) < 0)
+        if (movement.getAmount().add(getBalanceInDate(accomplishDate)).compareTo(BigDecimal.ZERO) < 0 ||
+                movement.getAmount().add(getBalance(YearMonth.from(accomplishDate))).compareTo(BigDecimal.ZERO) < 0)
             throw new InsufficientFundsException();
 
-        transactions.add(new Transaction(movement));
-        if (movement.isRecurrent()) {
-            IMovement recurrentMovement = movement.clone();
-            recurrentMovement.updateDueDate(updateRecurrenceDate(movement.getDueDate(), movement.getRepetitionFrequency()));
-            movements.add(new Movement(recurrentMovement));
-        }
-        movements.remove(movement);
+        IMovement originalMovement = fetchMovement(movement);
 
-        //Implementa a criação de transação. com factory
+        if (movement.isAccomplished() || originalMovement.isAccomplished())
+            throw new MovementAlreadyAccomplishException();
+
+        synchronizeMovement(movement, originalMovement);
+
+        if (movement.isRecurrent()) {
+            LocalDate nextDate = updateRecurrenceDate(originalMovement.getDueDate(), originalMovement.getRepetitionFrequency());
+            IMovement recurrentMovement = IMovementFactory.createRecurrentMovement(originalMovement, nextDate);
+            movements.add(recurrentMovement);
+        }
+        originalMovement.accomplish();
     }
+
 
     /**
      * Adds a new payment method to the wallet.
@@ -390,9 +433,8 @@ public class Wallet implements IWallet {
      * @return a collection with all the movements of the wallet.
      */
     @Override
-    @SuppressWarnings("unchecked")
     public Set<IMovement> getMovements() {
-        return (Set<IMovement>) copyOperations(movements);
+        return copyMovements(this.movements);
     }
 
     /**
@@ -401,9 +443,12 @@ public class Wallet implements IWallet {
      * @return a collection of all transactions in the wallet.
      */
     @Override
-    @SuppressWarnings("unchecked")
-    public Set<ITransaction> getTransactions() {
-        return (Set<ITransaction>) copyOperations(transactions);
+    public Set<IMovement> getTransactions() {
+        Set<IMovement> transaction = new TreeSet<>();
+        for (IMovement m : this.movements)
+            if (m.isAccomplished())
+                transaction.add(m.clone());
+        return transaction;
     }
 
     /**
@@ -412,7 +457,7 @@ public class Wallet implements IWallet {
      * @return a collection of Operation for the current month.
      */
     @Override
-    public Set<IOperation> getMonthOperations() {
+    public Set<IMovement> getMonthOperations() {
 
         return getMonthOperations(YearMonth.now());
     }
@@ -425,14 +470,13 @@ public class Wallet implements IWallet {
      * @throws NullArgumentException if the argument is null.
      */
     @Override
-    public Set<IOperation> getMonthOperations(YearMonth reference) {
+    public Set<IMovement> getMonthOperations(YearMonth reference) {
         if (reference == null)
             throw new NullArgumentException();
 
-        Set<IOperation> operations = new TreeSet<>();
-        Set<IOperation> allOperations = getAllOperations();
+        Set<IMovement> operations = new TreeSet<>();
 
-        for (IOperation op : allOperations)
+        for (IMovement op : this.movements)
             if (YearMonth.from(op.getDueDate()).equals(reference))
                 operations.add(op.clone());
 
@@ -445,7 +489,7 @@ public class Wallet implements IWallet {
      * @return a collection of Operation for the current year.
      */
     @Override
-    public Set<IOperation> getYearOperations() {
+    public Set<IMovement> getYearOperations() {
         return getYearOperations(Year.now());
     }
 
@@ -457,13 +501,12 @@ public class Wallet implements IWallet {
      * @throws NullArgumentException if the argument is null.
      */
     @Override
-    public Set<IOperation> getYearOperations(Year year) {
+    public Set<IMovement> getYearOperations(Year year) {
         if (year == null)
             throw new NullArgumentException();
 
-        Set<IOperation> operations = new TreeSet<>();
-        Set<IOperation> allOperations = getAllOperations();
-        for (IOperation op : allOperations)
+        Set<IMovement> operations = new TreeSet<>();
+        for (IMovement op : this.movements)
             if (Year.from(op.getDueDate()).equals(year))
                 operations.add(op.clone());
         return operations;
@@ -478,13 +521,12 @@ public class Wallet implements IWallet {
      * @throws NullArgumentException if the argument is null.
      */
     @Override
-    public Set<IOperation> getOperationsBetween(YearMonth start, YearMonth end) {
+    public Set<IMovement> getOperationsBetween(YearMonth start, YearMonth end) {
         if (start == null || end == null)
             throw new NullArgumentException();
 
-        Set<IOperation> operations = new TreeSet<>();
-        Set<IOperation> allOperations = getAllOperations();
-        for (IOperation op : allOperations)
+        Set<IMovement> operations = new TreeSet<>();
+        for (IMovement op : this.movements)
             if (YearMonth.from(op.getDueDate()).equals(start) ||
                     YearMonth.from(op.getDueDate()).equals(end) ||
                     (YearMonth.from(op.getDueDate()).isAfter(start) && YearMonth.from(op.getDueDate()).isBefore(end)))
@@ -513,13 +555,14 @@ public class Wallet implements IWallet {
     public BigDecimal getBalance(YearMonth reference) {
         if (reference == null)
             throw new NullArgumentException();
-        Predicate<IOperation> predicate = (t) -> YearMonth.from(t.getDueDate()).equals(reference) ||
-                YearMonth.from(t.getDueDate()).isBefore(reference);
-        return getCashFlow(predicate, transactions);
+        Predicate<IMovement> predicate = (t) -> t.isAccomplished() &&
+                (YearMonth.from(t.getAccomplishDate()).equals(reference) ||
+                        YearMonth.from(t.getAccomplishDate()).isBefore(reference));
+        return getCashFlow(predicate);
     }
 
     /**
-     * Returns the total amount of credit transactions in the current month.
+     * Returns the total amount of credit transactions, filtered by their date of accomplish, in the current month.
      *
      * @return the total amount of credit transactions in the current month.
      */
@@ -529,7 +572,7 @@ public class Wallet implements IWallet {
     }
 
     /**
-     * Returns the total value of credit transactions in the month / year.
+     * Returns the total value of credit transactions, filtered by their date of accomplish, in the month / year.
      *
      * @param reference month / year.
      * @return the total value of credit transactions in the month / year.
@@ -540,14 +583,16 @@ public class Wallet implements IWallet {
         if (reference == null)
             throw new NullArgumentException();
 
-        Predicate<IOperation> predicate = (t) -> YearMonth.from(t.getDueDate()).equals(reference) && t.isCredit();
-        return getCashFlow(predicate, transactions);
+        Predicate<IMovement> predicate = (t) -> t.isAccomplished() &&
+                YearMonth.from(t.getAccomplishDate()).equals(reference) &&
+                t.isCredit();
+        return getCashFlow(predicate);
     }
 
     /**
-     * Returns the total amount of credit transactions in the current year.
+     * Returns the total amount of credit transactions, filtered by their date of accomplish, in the current year.
      *
-     * @return the total amount of credit transactions in the current year.
+     * @return the total amount of credit transactions, filtered by their date of accomplish, in the current year.
      */
     @Override
     public BigDecimal getCashInflowInYear() {
@@ -555,24 +600,26 @@ public class Wallet implements IWallet {
     }
 
     /**
-     * Returns the total value of credit transactions in the year.
+     * Returns the total value of credit transactions, filtered by their date of accomplish, in the year.
      *
      * @param year year for calculation.
-     * @return the total value of credit transactions in the year.
+     * @return the total value of credit transactions, filtered by their date of accomplish, in the year.
      * @throws NullArgumentException if the argument is null.
      */
     @Override
     public BigDecimal getCashInflowInYear(Year year) {
         if (year == null)
             throw new NullArgumentException();
-        Predicate<IOperation> predicate = (t) -> Year.from(t.getDueDate()).equals(year) && t.isCredit();
-        return getCashFlow(predicate, transactions);
+        Predicate<IMovement> predicate = (t) -> t.isAccomplished() &&
+                Year.from(t.getAccomplishDate()).equals(year) &&
+                t.isCredit();
+        return getCashFlow(predicate);
     }
 
     /**
-     * Returns the total amount of debit transactions in the current month.
+     * Returns the total amount of debit transactions, filtered by their date of accomplish, in the current month.
      *
-     * @return the total amount of debit transactions in the current month.
+     * @return the total amount of debit transactions, filtered by their date of accomplish, in the current month.
      */
     @Override
     public BigDecimal getCashOutflow() {
@@ -580,24 +627,26 @@ public class Wallet implements IWallet {
     }
 
     /**
-     * Returns the total value of debit transactions in the month / year.
+     * Returns the total value of debit transactions, filtered by their date of accomplish, in the month / year.
      *
      * @param reference month / year.
-     * @return the total value of debit transactions in the month / year.
+     * @return the total value of debit transactions, filtered by their date of accomplish, in the month / year.
      * @throws NullArgumentException if the argument is null.
      */
     @Override
     public BigDecimal getCashOutflow(YearMonth reference) {
         if (reference == null)
             throw new NullArgumentException();
-        Predicate<IOperation> predicate = (t) -> YearMonth.from(t.getDueDate()).equals(reference) && t.isDebit();
-        return getCashFlow(predicate, transactions);
+        Predicate<IMovement> predicate = (t) -> t.isAccomplished() &&
+                YearMonth.from(t.getAccomplishDate()).equals(reference) &&
+                t.isDebit();
+        return getCashFlow(predicate);
     }
 
     /**
-     * Returns the total amount of debit transactions in the current year.
+     * Returns the total amount of debit transactions, filtered by their date of accomplish, in the current year.
      *
-     * @return the total amount of debit transactions in the current year.
+     * @return the total amount of debit transactions, filtered by their date of accomplish, in the current year.
      */
     @Override
     public BigDecimal getCashOutflowInYear() {
@@ -605,24 +654,26 @@ public class Wallet implements IWallet {
     }
 
     /**
-     * Returns the total value of debit transactions in the year.
+     * Returns the total value of debit transactions, filtered by their date of accomplish, in the year.
      *
      * @param year year for calculation.
-     * @return the total value of debit transactions in the year.
+     * @return the total value of debit transactions, filtered by their date of accomplish, in the year.
      * @throws NullArgumentException if the argument is null.
      */
     @Override
     public BigDecimal getCashOutflowInYear(Year year) {
         if (year == null)
             throw new NullArgumentException();
-        Predicate<IOperation> predicate = (t) -> Year.from(t.getDueDate()).equals(year) && t.isDebit();
-        return getCashFlow(predicate, transactions);
+        Predicate<IMovement> predicate = (t) -> t.isAccomplished() &&
+                Year.from(t.getAccomplishDate()).equals(year) &&
+                t.isDebit();
+        return getCashFlow(predicate);
     }
 
     /**
-     * Returns the current balance expected (transactions + movement).
+     * Returns the current balance expected only movement, filtered by their due date.
      *
-     * @return the current balance expected (transactions + movement).
+     * @return the current balance expected only movement, filtered by their due date.
      */
     @Override
     public BigDecimal getBalanceExpected() {
@@ -630,23 +681,24 @@ public class Wallet implements IWallet {
     }
 
     /**
-     * Returns the reference balance expected (transactions + movement).
+     * Returns the reference balance expected only movement, filtered by their due date.
      *
      * @param reference month / year.
-     * @return the reference balance expected (transactions + movement).
+     * @return the reference balance expected only movement, filtered by their due date.
      * @throws NullArgumentException if the argument is null.
      */
     @Override
     public BigDecimal getBalanceExpected(YearMonth reference) {
         if (reference == null)
             throw new NullArgumentException();
-        Predicate<IOperation> predicate = (t) -> YearMonth.from(t.getDueDate()).equals(reference) ||
-                YearMonth.from(t.getDueDate()).isBefore(reference);
-        return getCashFlow(predicate, getAllOperations());
+        Predicate<IMovement> predicate = (t) ->
+                ((YearMonth.from(t.getDueDate()).equals(reference) ||
+                        YearMonth.from(t.getDueDate()).isBefore(reference)));
+        return getCashFlow(predicate);
     }
 
     /**
-     * Returns the total amount of credit transactions and movement in the current month.
+     * Returns the total amount of credit movement, filtered by their due date, in the current month.
      *
      * @return the total amount of credit transactions and movement in the current month.
      */
@@ -656,7 +708,7 @@ public class Wallet implements IWallet {
     }
 
     /**
-     * Returns the total value of credit transactions and movement in the month / year.
+     * Returns the total value of credit movement, filtered by their due date,  in the month / year.
      *
      * @param reference month / year.
      * @return the total value of credit transactions and movement in the month / year.
@@ -666,14 +718,15 @@ public class Wallet implements IWallet {
     public BigDecimal getCashInflowExpected(YearMonth reference) {
         if (reference == null)
             throw new NullArgumentException();
-        Predicate<IOperation> predicate = (t) -> YearMonth.from(t.getDueDate()).equals(reference) && t.isCredit();
-        return getCashFlow(predicate, getAllOperations());
+        Predicate<IMovement> predicate = (t) ->
+                (YearMonth.from(t.getDueDate()).equals(reference) && t.isCredit());
+        return getCashFlow(predicate);
     }
 
     /**
-     * Returns the total amount of credit transactions and movement in the current year.
+     * Returns the total amount of credit movement, filtered by their due date, in the current year.
      *
-     * @return the total amount of credit transactions and movement in the current year.
+     * @return the total amount of credit movement, filtered by their due date, in the current year.
      */
     @Override
     public BigDecimal getCashInflowInYearExpected() {
@@ -681,7 +734,7 @@ public class Wallet implements IWallet {
     }
 
     /**
-     * Returns the total value of credit transactions and movement in the year.
+     * Returns the total value of credit movement, filtered by their due date, in the year.
      *
      * @param year year for calculation.
      * @return the total value of credit transactions and movement in the year.
@@ -691,14 +744,15 @@ public class Wallet implements IWallet {
     public BigDecimal getCashInflowInYearExpected(Year year) {
         if (year == null)
             throw new NullArgumentException();
-        Predicate<IOperation> predicate = (t) -> Year.from(t.getDueDate()).equals(year) && t.isCredit();
-        return getCashFlow(predicate, getAllOperations());
+        Predicate<IMovement> predicate = (t) ->
+                (Year.from(t.getDueDate()).equals(year) && t.isCredit());
+        return getCashFlow(predicate);
     }
 
     /**
-     * Returns the total amount of debit transactions and movement in the current month.
+     * Returns the total amount of debit movement, filtered by their due date, in the current month.
      *
-     * @return the total amount of debit transactions and movement in the current month.
+     * @return the total amount of debit movement, filtered by their due date, in the current month.
      */
     @Override
     public BigDecimal getCashOutflowExpected() {
@@ -706,24 +760,25 @@ public class Wallet implements IWallet {
     }
 
     /**
-     * Returns the total value of debit transactions and movement in the month / year.
+     * Returns the total value of debit movement, filtered by their due date, the month / year.
      *
      * @param reference month / year.
-     * @return the total value of debit transactions and movement in the month / year.
+     * @return the total value of debit movement, filtered by their due date, in the month / year.
      * @throws NullArgumentException if the argument is null.
      */
     @Override
     public BigDecimal getCashOutflowExpected(YearMonth reference) {
         if (reference == null)
             throw new NullArgumentException();
-        Predicate<IOperation> predicate = (t) -> YearMonth.from(t.getDueDate()).equals(reference) && t.isDebit();
-        return getCashFlow(predicate, getAllOperations());
+        Predicate<IMovement> predicate = (t) ->
+                (YearMonth.from(t.getDueDate()).equals(reference) && t.isDebit());
+        return getCashFlow(predicate);
     }
 
     /**
-     * Returns the total amount of debit transactions and movement in the current year.
+     * Returns the total amount of debit movement, filtered by their due date, in the current year.
      *
-     * @return the total amount of debit transactions and movement in the current year.
+     * @return the total amount of debit movement, filtered by their due date, in the current year.
      */
     @Override
     public BigDecimal getCashOutflowInYearExpected() {
@@ -731,18 +786,19 @@ public class Wallet implements IWallet {
     }
 
     /**
-     * Returns the total value of debit transactions and movement in the year.
+     * Returns the total value of debit movement, filtered by their due date, in the year.
      *
      * @param year year for calculation.
-     * @return the total value of debit transactions and movement in the year.
+     * @return the total value of debit movement, filtered by their due date, in the year.
      * @throws NullArgumentException if the argument is null.
      */
     @Override
     public BigDecimal getCashOutflowInYearExpected(Year year) {
         if (year == null)
             throw new NullArgumentException();
-        Predicate<IOperation> predicate = (t) -> Year.from(t.getDueDate()).equals(year) && t.isDebit();
-        return getCashFlow(predicate, getAllOperations());
+        Predicate<IMovement> predicate = (t) ->
+                (Year.from(t.getDueDate()).equals(year) && t.isDebit());
+        return getCashFlow(predicate);
     }
 
     @Override
@@ -755,7 +811,7 @@ public class Wallet implements IWallet {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Wallet wallet = (Wallet) o;
-        return ID.equals(wallet.ID) && name.equals(wallet.name) && description.equals(wallet.description) && currency.equals(wallet.currency) && formOfPayments.equals(wallet.formOfPayments) && movements.equals(wallet.movements) && transactions.equals(wallet.transactions) && payeeFormat.equals(wallet.payeeFormat);
+        return ID.equals(wallet.ID) && name.equals(wallet.name) && description.equals(wallet.description) && currency.equals(wallet.currency) && formOfPayments.equals(wallet.formOfPayments) && movements.equals(wallet.movements) && payeeFormat.equals(wallet.payeeFormat);
     }
 
     @Override
@@ -815,10 +871,10 @@ public class Wallet implements IWallet {
         return this.getBalance().compareTo(o.getBalance());
     }
 
-    private BigDecimal getCashFlow(Predicate<IOperation> predicate, Collection<? extends IOperation> operations) {
+    private BigDecimal getCashFlow(Predicate<IMovement> predicate) {
         BigDecimal cashInFlow = BigDecimal.ZERO;
 
-        for (IOperation t : operations)
+        for (IMovement t : this.movements)
             if (predicate.test(t))
                 cashInFlow = cashInFlow.add(t.getAmount());
 
@@ -839,24 +895,18 @@ public class Wallet implements IWallet {
 
     private BigDecimal getBalanceInDate(LocalDate date) {
         BigDecimal balance = BigDecimal.ZERO;
-        for (ITransaction t : transactions)
-            if (t.getDueDate().isEqual(date) || t.getDueDate().isBefore(date))
+        for (IMovement t : this.movements)
+            if (t.isAccomplished() && (t.getDueDate().isEqual(date) || t.getDueDate().isBefore(date)))
                 balance = balance.add(t.getAmount());
 
         return balance;
     }
 
-    private Set<IOperation> getAllOperations() {
-        Set<IOperation> allOperations = new TreeSet<>();
-        allOperations.addAll(transactions);
-        allOperations.addAll(movements);
-        return allOperations;
-    }
 
-    private Set<? extends IOperation> copyOperations(Collection<? extends IOperation> source) {
-        Set<IOperation> destination = new TreeSet<>();
-        for (IOperation o : source)
-            destination.add(o.clone());
+    private Set<IMovement> copyMovements(Collection<IMovement> source) {
+        Set<IMovement> destination = new TreeSet<>();
+        for (IMovement m : source)
+            destination.add(m.clone());
         return destination;
     }
 
@@ -866,7 +916,10 @@ public class Wallet implements IWallet {
 
     private void updateOrDeleteMovement(IMovement movement, EHandlingMode handlingMode, Action action) {
 
+
         if (handlingMode == EHandlingMode.JUST_THIS_ONE) {
+            if (fetchMovement(movement).isAccomplished())
+                throw new MovementAlreadyAccomplishException();
             movements.remove(movement);
             if (action == Action.UPDATE)
                 movements.add(movement);
@@ -882,7 +935,7 @@ public class Wallet implements IWallet {
             Iterator<IMovement> it = movements.iterator();
             while (it.hasNext()) {
                 IMovement m = it.next();
-                if (m.getGroupID().equals(movement.getGroupID()) && predicate.test(m)) {
+                if (!m.isAccomplished() && m.getGroupID().equals(movement.getGroupID()) && predicate.test(m)) {
                     if (action == Action.REMOVE)
                         it.remove();
                     else
@@ -900,10 +953,22 @@ public class Wallet implements IWallet {
         destiny.updatePayee(source.getPayee());
         destiny.updateCategory(source.getCategory());
         destiny.updateDescription(source.getDescription());
+        for (IAttachment a : source.getAttachments())
+            destiny.addAttachment(a);
+
     }
 
-    @SuppressWarnings("unused")
-    private Wallet() {
+    private IMovement fetchMovement(IMovement movement) {
+        IMovement foundMovement = null;
+        for (IMovement m : this.movements)
+            if (m.equals(movement)) {
+                foundMovement = m;
+                break;
+            }
+        return foundMovement;
+    }
+
+    protected Wallet() {
     }
 
     @SuppressWarnings("unused")
@@ -934,11 +999,6 @@ public class Wallet implements IWallet {
     @SuppressWarnings("unused")
     private void setMovements(Set<IMovement> movements) {
         this.movements = movements;
-    }
-
-    @SuppressWarnings("unused")
-    private void setTransactions(Set<ITransaction> transactions) {
-        this.transactions = transactions;
     }
 
 }
