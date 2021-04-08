@@ -40,7 +40,7 @@ public class Movement implements IMovement {
     private Set<IAttachment> attachments;
     @Column(nullable = false)
     @Enumerated
-    private EOperationType MovementType;
+    private EOperationType movementType;
     @Column(nullable = false)
     @Enumerated
     private ERepetitionFrequency frequency;
@@ -89,7 +89,7 @@ public class Movement implements IMovement {
         this.attachments = new HashSet<>();
         this.attachments.addAll(attachments);
 
-        this.MovementType = MovementType;
+        this.movementType = MovementType;
         this.frequency = frequency;
         this.accomplished = false;
         this.registrationDate = LocalDate.now();
@@ -127,11 +127,12 @@ public class Movement implements IMovement {
         this.attachments = new HashSet<>();
         this.attachments.addAll(movement.getAttachments());
         this.groupID = movement.getGroupID();
-        this.MovementType = movement.isCredit() ? CREDIT : DEBIT;
+        this.movementType = movement.isCredit() ? CREDIT : DEBIT;
         this.frequency = movement.getRepetitionFrequency();
         this.accomplished = movement.isAccomplished();
         this.registrationDate = movement.getRegistrationDate();
         this.accomplishDate = movement.getAccomplishDate();
+        this.active = movement.isActive();
     }
 
 
@@ -488,7 +489,7 @@ public class Movement implements IMovement {
     public void updateMovementType(EOperationType type) {
         if (type == null)
             throw new NullArgumentException();
-        this.MovementType = type;
+        this.movementType = type;
         normalizesAmount();
     }
 
@@ -600,10 +601,10 @@ public class Movement implements IMovement {
                 description.equals(movement.description) && amount.equals(movement.amount) &&
                 dueDate.equals(movement.dueDate) && formOfPayment.equals(movement.formOfPayment) &&
                 payee.equals(movement.payee) && category.equals(movement.category) &&
-                attachments.equals(movement.attachments) && MovementType == movement.MovementType &&
+                attachments.equals(movement.attachments) && movementType == movement.movementType &&
                 frequency == movement.frequency && groupID.equals(movement.groupID) &&
                 Objects.equals(accomplishDate, movement.accomplishDate) &&
-                registrationDate.equals(movement.registrationDate);
+                registrationDate.equals(movement.registrationDate) && active == movement.isActive();
     }
 
 
@@ -685,7 +686,7 @@ public class Movement implements IMovement {
 
     @SuppressWarnings("unused")
     private void setMovementType(EOperationType movementType) {
-        this.MovementType = movementType;
+        this.movementType = movementType;
     }
 
     @SuppressWarnings("unused")
@@ -695,7 +696,7 @@ public class Movement implements IMovement {
 
     @SuppressWarnings("unused")
     private EOperationType getMovementType() {
-        return MovementType;
+        return movementType;
     }
 
     @SuppressWarnings("unused")
@@ -750,9 +751,9 @@ public class Movement implements IMovement {
     }
 
     private void normalizesAmount() {
-        if (this.MovementType == CREDIT && this.amount.compareTo(BigDecimal.ZERO) < 0) {
+        if (this.movementType == CREDIT && this.amount.compareTo(BigDecimal.ZERO) < 0) {
             this.amount = this.amount.multiply(new BigDecimal("-1"));
-        } else if (this.MovementType == DEBIT && this.amount.compareTo(BigDecimal.ZERO) > 0) {
+        } else if (this.movementType == DEBIT && this.amount.compareTo(BigDecimal.ZERO) > 0) {
             this.amount = this.amount.multiply(new BigDecimal("-1"));
         }
     }
