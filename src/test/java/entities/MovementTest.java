@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import static bll.builders.IMovementBuilder.makeMovement;
 import static bll.entities.IMovement.COMPARE_FOR_AMOUNT;
 import static bll.enumerators.EOperationType.CREDIT;
 import static bll.enumerators.EOperationType.DEBIT;
@@ -26,18 +27,12 @@ public class MovementTest {
     IMovementCategory category1 = new MovementCategory("Mercado");
     IMovementCategory category2 = new MovementCategory("Education");
 
-    IMovement obj1 = new Movement("Christmas shopping",
-            new BigDecimal("33.50"),
-            LocalDate.now(),
-            formOfPayment,
-            payee,
-            category1, CREDIT);
-    IMovement obj2 = new Movement("English course",
-            new BigDecimal("22.30"),
-            LocalDate.now(),
-            formOfPayment,
-            payee,
-            category2, DEBIT);
+    IMovement obj1 = makeMovement("Christmas shopping", "33.50",
+            LocalDate.now(), formOfPayment, payee, category1, CREDIT).build();
+
+    IMovement obj2 = makeMovement("English course", "22.30",
+            LocalDate.of(1970, Month.JANUARY, 1), formOfPayment, payee, category2, DEBIT).build();
+
 
 
     @Test
