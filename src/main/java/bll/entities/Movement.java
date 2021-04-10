@@ -71,21 +71,18 @@ public class Movement implements IMovement {
 
         this.ID = UUID.randomUUID();
 
-        if (frequency == NONE) {
-            if (groupID == null)
-                this.groupID = this.ID;
-            else
-                this.groupID = groupID;
-        } else {
+        if (frequency == NONE)
+            this.groupID = Objects.requireNonNullElseGet(groupID, () -> this.ID);
+        else
             this.groupID = this.ID;
-        }
+
         this.name = name;
         this.description = description;
         this.amount = amount;
         this.dueDate = dueDate;
-        this.formOfPayment = formOfPayment;
-        this.payee = payee;
-        this.category = category;
+        this.formOfPayment = formOfPayment.clone();
+        this.payee = payee.clone();
+        this.category = category.clone();
         this.attachments = new HashSet<>();
         this.attachments.addAll(attachments);
 
@@ -463,7 +460,7 @@ public class Movement implements IMovement {
     public void updateCategory(IMovementCategory newCategory) {
         if (newCategory == null)
             throw new NullArgumentException();
-        this.category = newCategory;
+        this.category = newCategory.clone();
     }
 
     /**
@@ -476,7 +473,7 @@ public class Movement implements IMovement {
     public void updatePayee(IPayee newPayee) {
         if (newPayee == null)
             throw new NullArgumentException();
-        this.payee = newPayee;
+        this.payee = newPayee.clone();
     }
 
     /**
@@ -503,7 +500,7 @@ public class Movement implements IMovement {
     public void updateFormOfPayment(IFormOfPayment newFormOfPayment) {
         if (newFormOfPayment == null)
             throw new NullArgumentException();
-        this.formOfPayment = newFormOfPayment;
+        this.formOfPayment = newFormOfPayment.clone();
     }
 
     /**
