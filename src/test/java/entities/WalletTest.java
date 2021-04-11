@@ -11,6 +11,7 @@ import java.time.Year;
 import java.time.YearMonth;
 import java.util.*;
 
+import static bll.builders.IMovementBuilder.makeMovement;
 import static bll.entities.IWallet.COMPARE_BY_ESTIMATED_BALANCE;
 import static bll.enumerators.EHandlingMode.*;
 import static bll.enumerators.EOperationType.CREDIT;
@@ -28,18 +29,11 @@ public class WalletTest {
     IFormOfPayment formOfPayment2 = new FormOfPayment("Transfer");
     IMovementCategory category1 = new MovementCategory("Mercado");
     IMovementCategory category2 = new MovementCategory("Education");
-    IMovement movement1 = new Movement("Christmas shopping",
-            new BigDecimal("33.50"),
-            LocalDate.now(),
-            formOfPayment1,
-            payee,
-            category1, DEBIT);
-    IMovement movement2 = new Movement("salary",
-            new BigDecimal("122.30"),
-            LocalDate.of(1970, Month.JANUARY, 1),
-            formOfPayment1,
-            payee,
-            category2, CREDIT);
+    IMovement movement1 = makeMovement("Christmas shopping", "33.50",
+            LocalDate.now(), formOfPayment1, payee, category1, DEBIT).build();
+
+    IMovement movement2 = makeMovement("salary", "122.30",
+            LocalDate.of(1970, Month.JANUARY, 1), formOfPayment1, payee, category2, CREDIT).build();
 
     @Test
     public void shouldThrowExceptionBySmallName() {
@@ -107,7 +101,6 @@ public class WalletTest {
     }
 
 
-
     @Test
     public void shouldThrowExceptionByNullDescription() {
         assertThrows(NullArgumentException.class, () -> new Wallet("Wallet", null,
@@ -153,28 +146,35 @@ public class WalletTest {
 
 
     @Test
-    public void shouldThrowExceptionForTryingToRemoveNonexistentMovement() {
-        assertThrows(NonExistentMovementException.class, () -> obj1.removeMovement(movement1));
-    }
-
-    @Test
-    public void shouldThrowExceptionForTryingToRemoveAMovementWithoutHandlingMode() {
-        IMovement installment = new Movement("A Installment",
-                new BigDecimal("33.60"),
-                LocalDate.now(),
-                formOfPayment1,
-                payee,
-                category1, CREDIT, NONE, UUID.randomUUID());
-        obj1.addInstallment(installment, WEEKLY, 2);
-        assertThrows(InstallmentWithoutHandlingMode.class, () -> obj1.removeMovement(installment));
-    }
-
-    @Test
     public void shouldThrowExceptionForTryingToAddExistingMovement() {
         obj1.addMovement(movement1);
         assertThrows(ExistingMovementException.class, () -> obj1.addMovement(movement1));
     }
 
+    @Test
+    public void shouldThrowExceptionByTryAddInactiveMovement() {
+        movement1.inactivate();
+        assertThrows(InactiveMovementException.class, () -> obj1.addMovement(movement1));
+    }
+
+    @Test
+    public void shouldThrowExceptionByTryAddAAccomplishedMovement() {
+        movement2.accomplish();
+        assertThrows(MovementAlreadyAccomplishException.class, () -> obj1.addMovement(movement2));
+    }
+
+
+    @Test
+    public void shouldAddAMovement() {
+        assertTrue(obj1.getMonthOperations().isEmpty());
+        assertTrue(obj1.getMovements().isEmpty());
+        obj1.addMovement(movement1);
+        assertEquals(1, obj1.getMonthOperations().size());
+        assertTrue(obj1.getMonthOperations().contains(movement1));
+
+        assertEquals(1, obj1.getMovements().size());
+        assertTrue(obj1.getMovements().contains(movement1));
+    }
 
     @Test
     public void shouldHaveTheCorrectName() {
@@ -206,35 +206,42 @@ public class WalletTest {
     }
 
     @Test
-    public void shouldThrowExceptionByTryAddAAccomplishedMovement(){
-        movement2.accomplish();
-        assertThrows(MovementAlreadyAccomplishException.class, ()-> obj1.addMovement(movement2));
+    public void shouldThrowExceptionForTryingToRemoveNonexistentMovement() {
+        assertThrows(NonExistentMovementException.class, () -> obj1.removeMovement(movement1));
     }
 
 
     @Test
-    public void shouldAddAMovement() {
-        assertTrue(obj1.getMonthOperations().isEmpty());
-        assertTrue(obj1.getMovements().isEmpty());
-        obj1.addMovement(movement1);
-        assertEquals(1, obj1.getMonthOperations().size());
-        assertTrue(obj1.getMonthOperations().contains(movement1));
-
-        assertEquals(1, obj1.getMovements().size());
-        assertTrue(obj1.getMovements().contains(movement1));
+    public void shouldThrowExceptionForTryingToRemoveAMovementWithoutHandlingMode() {
+        IMovement installment = new Movement("A Installment",
+                new BigDecimal("33.60"),
+                LocalDate.now(),
+                formOfPayment1,
+                payee,
+                category1, CREDIT, NONE, UUID.randomUUID());
+        obj1.addInstallment(installment, WEEKLY, 2);
+        assertThrows(InstallmentWithoutHandlingMode.class, () -> obj1.removeMovement(installment));
     }
 
     @Test
-    public void shouldThrowExceptionByTryRemoveAAccomplishedMovementOutside(){
+    public void shouldThrowExceptionByTryRemoveAAccomplishedMovementOutside() {
         obj1.addMovement(movement2);
         movement2.accomplish();
-        assertThrows(MovementAlreadyAccomplishException.class, ()-> obj1.removeMovement(movement2));
+        assertThrows(MovementAlreadyAccomplishException.class, () -> obj1.removeMovement(movement2));
     }
+
     @Test
-    public void shouldThrowExceptionByTryRemoveAAccomplishedMovementInside(){
+    public void shouldThrowExceptionByTryRemoveAAccomplishedMovementInside() {
         obj1.addMovement(movement2);
         obj1.confirmMovement(movement2);
-        assertThrows(MovementAlreadyAccomplishException.class, ()-> obj1.removeMovement(movement2));
+        assertThrows(MovementAlreadyAccomplishException.class, () -> obj1.removeMovement(movement2));
+    }
+
+    @Test
+    public void shouldThrowExceptionByTryRemoveInactiveMovement() {
+
+        movement1.inactivate();
+        assertThrows(InactiveMovementException.class, () -> obj1.removeMovement(movement1));
     }
 
     @Test
@@ -246,14 +253,45 @@ public class WalletTest {
         obj1.removeMovement(movement1);
         assertFalse(obj1.getMonthOperations().contains(movement1));
         assertTrue(obj1.getMonthOperations().isEmpty());
+    }
 
-        assertTrue(obj1.getMovements().isEmpty());
+    @Test
+    public void shouldThrowExceptionByTryUpdateExcludedMovement() {
         obj1.addMovement(movement1);
-        assertEquals(1, obj1.getMovements().size());
-        assertTrue(obj1.getMovements().contains(movement1));
         obj1.removeMovement(movement1);
-        assertFalse(obj1.getMovements().contains(movement1));
-        assertTrue(obj1.getMovements().isEmpty());
+        assertThrows(AttemptedToUseExcludedMovementException.class, () -> obj1.updateMovement(movement1));
+    }
+
+    @Test
+    public void shouldThrowExceptionByTryUpdateExcludedInstallment() {
+        IMovement installment = new Movement("A Installment",
+                new BigDecimal("33.60"),
+                LocalDate.now(),
+                formOfPayment1,
+                payee,
+                category1, CREDIT, NONE, UUID.randomUUID());
+
+        obj1.addInstallment(installment, MONTHLY, 6);
+        obj1.removeInstallment(installment, ALL);
+        assertThrows(AttemptedToUseExcludedMovementException.class, () -> obj1.updateInstallment(installment, ALL));
+    }
+
+    @Test
+    public void shouldThrowExceptionByTryUpdateInactiveMovement() {
+        movement1.inactivate();
+        assertThrows(InactiveMovementException.class, () -> obj1.updateMovement(movement1));
+    }
+
+    @Test
+    public void shouldThrowExceptionByTryUpdateInactiveInstallment() {
+        IMovement installment = new Movement("A Installment",
+                new BigDecimal("33.60"),
+                LocalDate.now(),
+                formOfPayment1,
+                payee,
+                category1, CREDIT, NONE, UUID.randomUUID());
+        installment.inactivate();
+        assertThrows(InactiveMovementException.class, () -> obj1.updateInstallment(installment, THIS_AND_NEXT));
     }
 
     @Test
@@ -282,6 +320,50 @@ public class WalletTest {
         List<IMovement> movements = new ArrayList<>(obj1.getMovements());
         assertEquals("New Movement Name", movements.get(1).getName());
 
+    }
+
+    @Test
+    public void shouldThrowExceptionByTryRemoveInactiveInstallment() {
+        IMovement installment = new Movement("A Installment",
+                new BigDecimal("33.60"),
+                LocalDate.now(),
+                formOfPayment1,
+                payee,
+                category1, CREDIT, NONE, UUID.randomUUID());
+        installment.inactivate();
+        assertThrows(InactiveMovementException.class, () -> obj1.removeInstallment(installment, THIS_AND_NEXT));
+    }
+
+    @Test
+    public void shouldThrowExceptionByTryAddInactiveInstallment() {
+        IMovement installment = new Movement("A Installment",
+                new BigDecimal("33.60"),
+                LocalDate.now(),
+                formOfPayment1,
+                payee,
+                category1, CREDIT, NONE, UUID.randomUUID());
+        installment.inactivate();
+        assertThrows(InactiveMovementException.class, () -> obj1.addInstallment(installment, MONTHLY, 5));
+    }
+
+    @Test
+    public void shouldThrowExceptionByTryAddExcludedMovement() {
+        obj1.addMovement(movement1);
+        obj1.removeMovement(movement1);
+        assertThrows(AttemptedToUseExcludedMovementException.class, () -> obj1.addMovement(movement1));
+    }
+
+    @Test
+    public void shouldThrowExceptionByTryAddExcludedInstallment() {
+        IMovement installment = new Movement("A Installment",
+                new BigDecimal("33.60"),
+                LocalDate.now(),
+                formOfPayment1,
+                payee,
+                category1, CREDIT, NONE, UUID.randomUUID());
+        obj1.addInstallment(installment, MONTHLY, 6);
+        obj1.removeInstallment(installment, JUST_THIS_ONE);
+        assertThrows(AttemptedToUseExcludedMovementException.class, () -> obj1.addInstallment(installment, MONTHLY, 6));
     }
 
     @Test
@@ -326,14 +408,17 @@ public class WalletTest {
 
         obj1.removeInstallment(installment, THIS_AND_NEXT);
         assertTrue(obj1.getMovements().isEmpty());
-        assertThrows(NonExistentMovementException.class, () -> obj1.removeInstallment(installment, THIS_AND_NEXT));
+        assertThrows(AttemptedToUseExcludedMovementException.class, () -> obj1.removeInstallment(installment, THIS_AND_NEXT));
 
-        obj1.addInstallment(installment, MONTHLY, 6);
-        obj1.removeInstallment(installment, ALL);
-        assertTrue(obj1.getMovements().isEmpty());
+        IMovement installment2 = new Movement("A Installment",
+                new BigDecimal("33.60"),
+                LocalDate.now(),
+                formOfPayment1,
+                payee,
+                category1, CREDIT, NONE, groupID);
 
         List<IMovement> movements;
-        obj1.addInstallment(installment, MONTHLY, 6);
+        obj1.addInstallment(installment2, MONTHLY, 6);
         movements = new ArrayList<>(obj1.getMovements());
         obj1.removeInstallment(movements.get(3), NEXT);
         assertEquals(4, obj1.getMovements().size());
@@ -380,23 +465,36 @@ public class WalletTest {
     }
 
     @Test
+    public void shouldThrowExceptionByTryConfirmInactiveMovement() {
+        movement2.inactivate();
+        assertThrows(InactiveMovementException.class, () -> obj1.confirmMovement(movement2));
+    }
+
+    @Test
+    public void shouldThrowExceptionByTryConfirmExcludedMovement() {
+        obj1.addMovement(movement2);
+        obj1.removeMovement(movement2);
+        assertThrows(AttemptedToUseExcludedMovementException.class, () -> obj1.confirmMovement(movement2));
+    }
+
+    @Test
     public void shouldThrowExceptionByNonExistentMovementForConfirm() {
         obj1.addMovement(movement1);
         assertThrows(NonExistentMovementException.class, () -> obj1.confirmMovement(movement2));
     }
 
     @Test
-    public void shouldThrowExceptionByTryConfirmMovementAccomplishedOut(){
+    public void shouldThrowExceptionByTryConfirmMovementAccomplishedOut() {
         obj1.addMovement(movement2);
         movement2.accomplish();
-        assertThrows(MovementAlreadyAccomplishException.class, ()-> obj1.confirmMovement(movement2));
+        assertThrows(MovementAlreadyAccomplishException.class, () -> obj1.confirmMovement(movement2));
     }
 
     @Test
-    public void shouldThrowExceptionByTryConfirmMovementAccomplishedInside(){
+    public void shouldThrowExceptionByTryConfirmMovementAccomplishedInside() {
         obj1.addMovement(movement2);
         obj1.confirmMovement(movement2);
-        assertThrows(MovementAlreadyAccomplishException.class, ()-> obj1.confirmMovement(movement2));
+        assertThrows(MovementAlreadyAccomplishException.class, () -> obj1.confirmMovement(movement2));
     }
 
     @Test

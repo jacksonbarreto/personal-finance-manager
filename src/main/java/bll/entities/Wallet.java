@@ -51,8 +51,8 @@ public class Wallet implements IWallet {
         this.formOfPayments = new HashSet<>();
         for (IFormOfPayment f : formOfPayments)
             this.formOfPayments.add(f.clone());
-        this.movements = new TreeSet<>();
-        this.payeeFormat = payeeFormat;
+        this.movements = new HashSet<>();
+        this.payeeFormat = payeeFormat.clone();
     }
 
     public Wallet(String name, IFormOfPayment formOfPayment, IPayee payeeFormat) {
@@ -68,8 +68,7 @@ public class Wallet implements IWallet {
         this.description = wallet.getDescription();
         this.currency = wallet.getCurrency();
         this.formOfPayments = new HashSet<>();
-        for (IFormOfPayment f : wallet.getFormOfPayment())
-            this.formOfPayments.add(f.clone());
+        this.formOfPayments.addAll(wallet.getFormOfPayment());
         this.movements = copyMovements(wallet.getMovements());
         this.payeeFormat = wallet.getPayeeFormat();
     }
@@ -137,7 +136,7 @@ public class Wallet implements IWallet {
      */
     @Override
     public IPayee getPayeeFormat() {
-        return this.payeeFormat;
+        return this.payeeFormat.clone();
     }
 
     /**
@@ -149,19 +148,25 @@ public class Wallet implements IWallet {
      * @throws IllegalFormOfPaymentException      if the form of payment does not exist in the wallet.
      * @throws InstallmentForbiddenException      if you try to add an installment.
      * @throws MovementAlreadyAccomplishException If the movement is already accomplished.
+     * @throws InactiveMovementException          if you try to use an inactive movement as a parameter.
      */
     @Override
     public void addMovement(IMovement movement) {
         if (movement == null)
             throw new NullArgumentException();
+        if (movement.isInactive())
+            throw new InactiveMovementException();
         if (movement.isInstallment())
             throw new InstallmentForbiddenException();
         if (movement.isAccomplished())
             throw new MovementAlreadyAccomplishException();
         if (!formOfPayments.contains(movement.getFormOfPayment()))
             throw new IllegalFormOfPaymentException();
-        if (movements.contains(movement))
-            throw new ExistingMovementException();
+        if (this.movements.contains(movement))
+            if (fetchMovement(movement).isInactive())
+                throw new AttemptedToUseExcludedMovementException();
+            else
+                throw new ExistingMovementException();
         this.movements.add(movement.clone());
     }
 
@@ -171,18 +176,25 @@ public class Wallet implements IWallet {
      * @param movement             basic (initial) movement.
      * @param frequency            repetition
      * @param numberOfInstallments number of installment.
-     * @throws NullArgumentException               if the argument is null.
-     * @throws ExistingMovementException           if the movement already exists.
-     * @throws DontIsInstallmentException          if the movement is not an installment plan.
-     * @throws IllegalInstallmentQuantityException if the number of plots is less than 2.
-     * @throws MovementAlreadyAccomplishException  If the movement is already accomplished.
+     * @throws NullArgumentException                   if the argument is null.
+     * @throws ExistingMovementException               if the movement already exists.
+     * @throws DontIsInstallmentException              if the movement is not an installment plan.
+     * @throws IllegalInstallmentQuantityException     if the number of plots is less than 2.
+     * @throws MovementAlreadyAccomplishException      If the movement is already accomplished.
+     * @throws InactiveMovementException               if you try to use an inactive movement as a parameter.
+     * @throws AttemptedToUseExcludedMovementException if you try to use an already excluded movement as a parameter.
      */
     @Override
     public void addInstallment(IMovement movement, ERepetitionFrequency frequency, int numberOfInstallments) {
         if (movement == null || frequency == null)
             throw new NullArgumentException();
+        if (movement.isInactive())
+            throw new InactiveMovementException();
         if (movements.contains(movement))
-            throw new ExistingMovementException();
+            if (fetchMovement(movement).isInactive())
+                throw new AttemptedToUseExcludedMovementException();
+            else
+                throw new ExistingMovementException();
         if (movement.isAccomplished())
             throw new MovementAlreadyAccomplishException();
         if (!movement.isInstallment())
@@ -205,22 +217,28 @@ public class Wallet implements IWallet {
      * Removes a movement from the wallet.
      *
      * @param movement to be removed.
-     * @throws NullArgumentException              if the argument is null.
-     * @throws NonExistentMovementException       if the movement does not exist in the wallet.
-     * @throws InstallmentWithoutHandlingMode     if the movement is in installments.
-     * @throws MovementAlreadyAccomplishException If the movement is already accomplished.
+     * @throws NullArgumentException                   if the argument is null.
+     * @throws NonExistentMovementException            if the movement does not exist in the wallet.
+     * @throws InstallmentWithoutHandlingMode          if the movement is in installments.
+     * @throws MovementAlreadyAccomplishException      If the movement is already accomplished.
+     * @throws InactiveMovementException               if you try to use an inactive movement as a parameter.
+     * @throws AttemptedToUseExcludedMovementException if you try to use an already excluded movement as a parameter.
      */
     @Override
     public void removeMovement(IMovement movement) {
         if (movement == null)
             throw new NullArgumentException();
+        if (movement.isInactive())
+            throw new InactiveMovementException();
+        if (this.movements.contains(movement) && fetchMovement(movement).isInactive())
+            throw new AttemptedToUseExcludedMovementException();
         if (!this.movements.contains(movement))
             throw new NonExistentMovementException();
         if (movement.isAccomplished() || fetchMovement(movement).isAccomplished())
             throw new MovementAlreadyAccomplishException();
         if (movement.isInstallment())
             throw new InstallmentWithoutHandlingMode();
-        this.movements.remove(movement);
+        fetchMovement(movement).inactivate();
     }
 
     /**
@@ -228,33 +246,41 @@ public class Wallet implements IWallet {
      *
      * @param installment  to be removed.
      * @param handlingMode How the removal should take place.
-     * @throws NullArgumentException              if the argument is null.
-     * @throws NonExistentMovementException       if the movement does not exist in the wallet.
-     * @throws DontIsInstallmentException         if the movement is not an installment plan.
-     * @throws MovementAlreadyAccomplishException If the movement is already accomplished.
+     * @throws NullArgumentException                   if the argument is null.
+     * @throws NonExistentMovementException            if the movement does not exist in the wallet.
+     * @throws DontIsInstallmentException              if the movement is not an installment plan.
+     * @throws MovementAlreadyAccomplishException      If the movement is already accomplished.
+     * @throws InactiveMovementException               if you try to use an inactive movement as a parameter.
+     * @throws AttemptedToUseExcludedMovementException if you try to use an already excluded movement as a parameter.
      */
     @Override
     public void removeInstallment(IMovement installment, EHandlingMode handlingMode) {
         if (installment == null || handlingMode == null)
             throw new NullArgumentException();
+        if (installment.isInactive())
+            throw new InactiveMovementException();
         if (!installment.isInstallment())
             throw new DontIsInstallmentException();
+        if (this.movements.contains(installment) && fetchMovement(installment).isInactive())
+            throw new AttemptedToUseExcludedMovementException();
         if (!this.movements.contains(installment))
             throw new NonExistentMovementException();
         if (installment.isAccomplished())
             throw new MovementAlreadyAccomplishException();
-        updateOrDeleteMovement(installment, handlingMode, Action.REMOVE);
+        updateOrDeleteInstallment(installment, handlingMode, Action.REMOVE);
     }
 
     /**
      * Confirms a movement in the wallet, turning it into a transaction.
      *
      * @param movement to be confirmed.
-     * @throws NullArgumentException              if the argument is null.
-     * @throws NonExistentMovementException       if the movement does not exist in the wallet.
-     * @throws IllegalFormOfPaymentException      if the form of payment does not exist in the wallet.
-     * @throws InsufficientFundsException         if the wallet does not have funds to support this transaction.
-     * @throws MovementAlreadyAccomplishException If the movement is already accomplished.
+     * @throws NullArgumentException                   if the argument is null.
+     * @throws NonExistentMovementException            if the movement does not exist in the wallet.
+     * @throws IllegalFormOfPaymentException           if the form of payment does not exist in the wallet.
+     * @throws InsufficientFundsException              if the wallet does not have funds to support this transaction.
+     * @throws MovementAlreadyAccomplishException      If the movement is already accomplished.
+     * @throws InactiveMovementException               if you try to use an inactive movement as a parameter.
+     * @throws AttemptedToUseExcludedMovementException if you try to use an already excluded movement as a parameter.
      */
     @Override
     public void confirmMovement(IMovement movement) {
@@ -266,26 +292,31 @@ public class Wallet implements IWallet {
      *
      * @param movement       to be confirmed.
      * @param accomplishDate to be confirmed.
-     * @throws NullArgumentException              if the argument is null.
-     * @throws NonExistentMovementException       if the movement does not exist in the wallet.
-     * @throws IllegalFormOfPaymentException      if the form of payment does not exist in the wallet.
-     * @throws InsufficientFundsException         if the wallet does not have funds to support this transaction.
-     * @throws MovementAlreadyAccomplishException If the movement is already accomplished.
+     * @throws NullArgumentException                   if the argument is null.
+     * @throws NonExistentMovementException            if the movement does not exist in the wallet.
+     * @throws IllegalFormOfPaymentException           if the form of payment does not exist in the wallet.
+     * @throws InsufficientFundsException              if the wallet does not have funds to support this transaction.
+     * @throws MovementAlreadyAccomplishException      If the movement is already accomplished.
+     * @throws InactiveMovementException               if you try to use an inactive movement as a parameter.
+     * @throws AttemptedToUseExcludedMovementException if you try to use an already excluded movement as a parameter.
      */
     @Override
     public void confirmMovement(IMovement movement, LocalDate accomplishDate) {
         if (movement == null)
             throw new NullArgumentException();
-
+        if (movement.isInactive())
+            throw new InactiveMovementException();
         if (!this.movements.contains(movement))
             throw new NonExistentMovementException();
+        IMovement originalMovement = fetchMovement(movement);
+        if (originalMovement.isInactive())
+            throw new AttemptedToUseExcludedMovementException();
         if (!this.formOfPayments.contains(movement.getFormOfPayment()))
             throw new IllegalFormOfPaymentException();
         if (movement.getAmount().add(getBalanceInDate(accomplishDate)).compareTo(BigDecimal.ZERO) < 0 ||
                 movement.getAmount().add(getBalance(YearMonth.from(accomplishDate))).compareTo(BigDecimal.ZERO) < 0)
             throw new InsufficientFundsException();
 
-        IMovement originalMovement = fetchMovement(movement);
 
         if (movement.isAccomplished() || originalMovement.isAccomplished())
             throw new MovementAlreadyAccomplishException();
@@ -384,23 +415,32 @@ public class Wallet implements IWallet {
      * Update an movement.
      *
      * @param movement to be updated.
-     * @throws NullArgumentException          if the argument is null.
-     * @throws NonExistentMovementException   if the movement does not exist in the wallet.
-     * @throws InstallmentWithoutHandlingMode if the movement is in installments.
-     * @throws IllegalFormOfPaymentException  if the form of payment does not exist in the wallet.
+     * @throws NullArgumentException                   if the argument is null.
+     * @throws NonExistentMovementException            if the movement does not exist in the wallet.
+     * @throws InstallmentWithoutHandlingMode          if the movement is in installments.
+     * @throws IllegalFormOfPaymentException           if the form of payment does not exist in the wallet.
+     * @throws InactiveMovementException               if you try to use an inactive movement as a parameter.
+     * @throws AttemptedToUseExcludedMovementException if you try to use an already excluded movement as a parameter.
      */
     @Override
     public void updateMovement(IMovement movement) {
         if (movement == null)
             throw new NullArgumentException();
+        if (movement.isInactive())
+            throw new InactiveMovementException();
         if (movement.isInstallment())
             throw new InstallmentWithoutHandlingMode();
         if (!formOfPayments.contains(movement.getFormOfPayment()))
             throw new IllegalFormOfPaymentException();
         if (!this.movements.contains(movement))
             throw new NonExistentMovementException();
-        movements.remove(movement);
-        movements.add(movement.clone());
+
+        IMovement originalMovement = fetchMovement(movement);
+
+        if (originalMovement.isInactive())
+            throw new AttemptedToUseExcludedMovementException();
+
+        synchronizeMovement(movement, originalMovement);
     }
 
     /**
@@ -408,23 +448,28 @@ public class Wallet implements IWallet {
      *
      * @param installment  to be updated.
      * @param handlingMode How the update should take place.
-     * @throws NullArgumentException         if the argument is null.
-     * @throws NonExistentMovementException  if the movement does not exist in the wallet.
-     * @throws DontIsInstallmentException    if the movement is not an installment plan.
-     * @throws IllegalFormOfPaymentException if the form of payment does not exist in the wallet.
+     * @throws NullArgumentException                   if the argument is null.
+     * @throws NonExistentMovementException            if the movement does not exist in the wallet.
+     * @throws DontIsInstallmentException              if the movement is not an installment plan.
+     * @throws IllegalFormOfPaymentException           if the form of payment does not exist in the wallet.
+     * @throws InactiveMovementException               if you try to use an inactive movement as a parameter.
+     * @throws AttemptedToUseExcludedMovementException if you try to use an already excluded movement as a parameter.
      */
     @Override
     public void updateInstallment(IMovement installment, EHandlingMode handlingMode) {
         if (installment == null || handlingMode == null)
             throw new NullArgumentException();
+        if (installment.isInactive())
+            throw new InactiveMovementException();
         if (!this.movements.contains(installment))
             throw new NonExistentMovementException();
         if (!installment.isInstallment())
             throw new DontIsInstallmentException();
         if (!formOfPayments.contains(installment.getFormOfPayment()))
             throw new IllegalFormOfPaymentException();
-
-        updateOrDeleteMovement(installment, handlingMode, Action.UPDATE);
+        if (fetchMovement(installment).isInactive())
+            throw new AttemptedToUseExcludedMovementException();
+        updateOrDeleteInstallment(installment, handlingMode, Action.UPDATE);
     }
 
     /**
@@ -434,7 +479,11 @@ public class Wallet implements IWallet {
      */
     @Override
     public Set<IMovement> getMovements() {
-        return copyMovements(this.movements);
+        Set<IMovement> movementsReturn = new TreeSet<>();
+        for (IMovement m : this.movements)
+            if (m.isActive())
+                movementsReturn.add(m.clone());
+        return movementsReturn;
     }
 
     /**
@@ -477,7 +526,7 @@ public class Wallet implements IWallet {
         Set<IMovement> operations = new TreeSet<>();
 
         for (IMovement op : this.movements)
-            if (YearMonth.from(op.getDueDate()).equals(reference))
+            if (op.isActive() && YearMonth.from(op.getDueDate()).equals(reference))
                 operations.add(op.clone());
 
         return operations;
@@ -507,7 +556,7 @@ public class Wallet implements IWallet {
 
         Set<IMovement> operations = new TreeSet<>();
         for (IMovement op : this.movements)
-            if (Year.from(op.getDueDate()).equals(year))
+            if (op.isActive() && Year.from(op.getDueDate()).equals(year))
                 operations.add(op.clone());
         return operations;
     }
@@ -525,11 +574,18 @@ public class Wallet implements IWallet {
         if (start == null || end == null)
             throw new NullArgumentException();
 
+        YearMonth yearMonthTemp;
+        if (start.isAfter(end)) {
+            yearMonthTemp = end;
+            end = start;
+            start = yearMonthTemp;
+        }
+
         Set<IMovement> operations = new TreeSet<>();
         for (IMovement op : this.movements)
-            if (YearMonth.from(op.getDueDate()).equals(start) ||
+            if (op.isActive() && (YearMonth.from(op.getDueDate()).equals(start) ||
                     YearMonth.from(op.getDueDate()).equals(end) ||
-                    (YearMonth.from(op.getDueDate()).isAfter(start) && YearMonth.from(op.getDueDate()).isBefore(end)))
+                    (YearMonth.from(op.getDueDate()).isAfter(start) && YearMonth.from(op.getDueDate()).isBefore(end))))
                 operations.add(op.clone());
         return operations;
     }
@@ -556,8 +612,8 @@ public class Wallet implements IWallet {
         if (reference == null)
             throw new NullArgumentException();
         Predicate<IMovement> predicate = (t) -> t.isAccomplished() &&
-                (YearMonth.from(t.getAccomplishDate()).equals(reference) ||
-                        YearMonth.from(t.getAccomplishDate()).isBefore(reference));
+                (t.isActive() && (YearMonth.from(t.getAccomplishDate()).equals(reference) ||
+                        YearMonth.from(t.getAccomplishDate()).isBefore(reference)));
         return getCashFlow(predicate);
     }
 
@@ -583,7 +639,7 @@ public class Wallet implements IWallet {
         if (reference == null)
             throw new NullArgumentException();
 
-        Predicate<IMovement> predicate = (t) -> t.isAccomplished() &&
+        Predicate<IMovement> predicate = (t) -> t.isActive() && t.isAccomplished() &&
                 YearMonth.from(t.getAccomplishDate()).equals(reference) &&
                 t.isCredit();
         return getCashFlow(predicate);
@@ -610,7 +666,7 @@ public class Wallet implements IWallet {
     public BigDecimal getCashInflowInYear(Year year) {
         if (year == null)
             throw new NullArgumentException();
-        Predicate<IMovement> predicate = (t) -> t.isAccomplished() &&
+        Predicate<IMovement> predicate = (t) -> t.isActive() && t.isAccomplished() &&
                 Year.from(t.getAccomplishDate()).equals(year) &&
                 t.isCredit();
         return getCashFlow(predicate);
@@ -637,7 +693,7 @@ public class Wallet implements IWallet {
     public BigDecimal getCashOutflow(YearMonth reference) {
         if (reference == null)
             throw new NullArgumentException();
-        Predicate<IMovement> predicate = (t) -> t.isAccomplished() &&
+        Predicate<IMovement> predicate = (t) -> t.isActive() && t.isAccomplished() &&
                 YearMonth.from(t.getAccomplishDate()).equals(reference) &&
                 t.isDebit();
         return getCashFlow(predicate);
@@ -664,7 +720,7 @@ public class Wallet implements IWallet {
     public BigDecimal getCashOutflowInYear(Year year) {
         if (year == null)
             throw new NullArgumentException();
-        Predicate<IMovement> predicate = (t) -> t.isAccomplished() &&
+        Predicate<IMovement> predicate = (t) -> t.isActive() && t.isAccomplished() &&
                 Year.from(t.getAccomplishDate()).equals(year) &&
                 t.isDebit();
         return getCashFlow(predicate);
@@ -691,7 +747,7 @@ public class Wallet implements IWallet {
     public BigDecimal getBalanceExpected(YearMonth reference) {
         if (reference == null)
             throw new NullArgumentException();
-        Predicate<IMovement> predicate = (t) ->
+        Predicate<IMovement> predicate = (t) -> t.isActive() &&
                 ((YearMonth.from(t.getDueDate()).equals(reference) ||
                         YearMonth.from(t.getDueDate()).isBefore(reference)));
         return getCashFlow(predicate);
@@ -718,7 +774,7 @@ public class Wallet implements IWallet {
     public BigDecimal getCashInflowExpected(YearMonth reference) {
         if (reference == null)
             throw new NullArgumentException();
-        Predicate<IMovement> predicate = (t) ->
+        Predicate<IMovement> predicate = (t) -> t.isActive() &&
                 (YearMonth.from(t.getDueDate()).equals(reference) && t.isCredit());
         return getCashFlow(predicate);
     }
@@ -744,7 +800,7 @@ public class Wallet implements IWallet {
     public BigDecimal getCashInflowInYearExpected(Year year) {
         if (year == null)
             throw new NullArgumentException();
-        Predicate<IMovement> predicate = (t) ->
+        Predicate<IMovement> predicate = (t) -> t.isActive() &&
                 (Year.from(t.getDueDate()).equals(year) && t.isCredit());
         return getCashFlow(predicate);
     }
@@ -770,7 +826,7 @@ public class Wallet implements IWallet {
     public BigDecimal getCashOutflowExpected(YearMonth reference) {
         if (reference == null)
             throw new NullArgumentException();
-        Predicate<IMovement> predicate = (t) ->
+        Predicate<IMovement> predicate = (t) -> t.isActive() &&
                 (YearMonth.from(t.getDueDate()).equals(reference) && t.isDebit());
         return getCashFlow(predicate);
     }
@@ -796,7 +852,7 @@ public class Wallet implements IWallet {
     public BigDecimal getCashOutflowInYearExpected(Year year) {
         if (year == null)
             throw new NullArgumentException();
-        Predicate<IMovement> predicate = (t) ->
+        Predicate<IMovement> predicate = (t) -> t.isActive() &&
                 (Year.from(t.getDueDate()).equals(year) && t.isDebit());
         return getCashFlow(predicate);
     }
@@ -811,7 +867,9 @@ public class Wallet implements IWallet {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Wallet wallet = (Wallet) o;
-        return ID.equals(wallet.ID) && name.equals(wallet.name) && description.equals(wallet.description) && currency.equals(wallet.currency) && formOfPayments.equals(wallet.formOfPayments) && movements.equals(wallet.movements) && payeeFormat.equals(wallet.payeeFormat);
+        return ID.equals(wallet.ID) && name.equals(wallet.name) && description.equals(wallet.description) &&
+                currency.equals(wallet.currency) && formOfPayments.equals(wallet.formOfPayments) &&
+                movements.equals(wallet.movements) && payeeFormat.equals(wallet.payeeFormat);
     }
 
     @Override
@@ -896,7 +954,7 @@ public class Wallet implements IWallet {
     private BigDecimal getBalanceInDate(LocalDate date) {
         BigDecimal balance = BigDecimal.ZERO;
         for (IMovement t : this.movements)
-            if (t.isAccomplished() && (t.getDueDate().isEqual(date) || t.getDueDate().isBefore(date)))
+            if (t.isActive() && t.isAccomplished() && (t.getDueDate().isEqual(date) || t.getDueDate().isBefore(date)))
                 balance = balance.add(t.getAmount());
 
         return balance;
@@ -914,32 +972,32 @@ public class Wallet implements IWallet {
         UPDATE, REMOVE
     }
 
-    private void updateOrDeleteMovement(IMovement movement, EHandlingMode handlingMode, Action action) {
+    private void updateOrDeleteInstallment(IMovement installment, EHandlingMode handlingMode, Action action) {
 
+        IMovement originalInstallment = fetchMovement(installment);
 
         if (handlingMode == EHandlingMode.JUST_THIS_ONE) {
-            if (fetchMovement(movement).isAccomplished())
+            if (fetchMovement(installment).isAccomplished())
                 throw new MovementAlreadyAccomplishException();
-            movements.remove(movement);
             if (action == Action.UPDATE)
-                movements.add(movement);
+                synchronizeMovement(installment, originalInstallment);
+            else
+                originalInstallment.inactivate();
         } else {
-            Predicate<IMovement> predicate = (m) -> true;
+            Predicate<IMovement> handlingModePredicate = (m) -> true;
             switch (handlingMode) {
-                case THIS_AND_NEXT -> predicate = (m) -> m.getDueDate().isAfter(movement.getDueDate()) || m.getID().equals(movement.getID());
-                case NEXT -> predicate = (m) -> m.getDueDate().isAfter(movement.getDueDate());
-                case THIS_AND_PREVIOUS -> predicate = (m) -> m.getDueDate().isBefore(movement.getDueDate()) || m.getID().equals(movement.getID());
-                case PREVIOUS -> predicate = (m) -> m.getDueDate().isBefore(movement.getDueDate());
+                case THIS_AND_NEXT -> handlingModePredicate = (m) -> m.getDueDate().isAfter(installment.getDueDate()) || m.getID().equals(installment.getID());
+                case NEXT -> handlingModePredicate = (m) -> m.getDueDate().isAfter(installment.getDueDate());
+                case THIS_AND_PREVIOUS -> handlingModePredicate = (m) -> m.getDueDate().isBefore(installment.getDueDate()) || m.getID().equals(installment.getID());
+                case PREVIOUS -> handlingModePredicate = (m) -> m.getDueDate().isBefore(installment.getDueDate());
             }
 
-            Iterator<IMovement> it = movements.iterator();
-            while (it.hasNext()) {
-                IMovement m = it.next();
-                if (!m.isAccomplished() && m.getGroupID().equals(movement.getGroupID()) && predicate.test(m)) {
+            for (IMovement m : movements) {
+                if (!m.isAccomplished() && m.getGroupID().equals(installment.getGroupID()) && handlingModePredicate.test(m)) {
                     if (action == Action.REMOVE)
-                        it.remove();
+                        m.inactivate();
                     else
-                        synchronizeMovement(movement, m);
+                        synchronizeMovement(installment, m);
                 }
             }
         }

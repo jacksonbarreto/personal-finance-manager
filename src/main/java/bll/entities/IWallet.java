@@ -73,11 +73,12 @@ public interface IWallet extends Serializable, Comparable<IWallet>, Cloneable {
      * Adds a new movement to the portfolio.
      *
      * @param movement a new movement to the portfolio.
-     * @throws NullArgumentException         if the argument is null.
-     * @throws ExistingMovementException     if the movement already exists.
-     * @throws IllegalFormOfPaymentException if the form of payment does not exist in the wallet.
-     * @throws InstallmentForbiddenException if you try to add an installment.
-     *  @throws MovementAlreadyAccomplishException If the movement is already accomplished.
+     * @throws NullArgumentException              if the argument is null.
+     * @throws ExistingMovementException          if the movement already exists.
+     * @throws IllegalFormOfPaymentException      if the form of payment does not exist in the wallet.
+     * @throws InstallmentForbiddenException      if you try to add an installment.
+     * @throws MovementAlreadyAccomplishException If the movement is already accomplished.
+     * @throws InactiveMovementException          if you try to use an inactive movement as a parameter.
      */
     void addMovement(IMovement movement);
 
@@ -91,7 +92,8 @@ public interface IWallet extends Serializable, Comparable<IWallet>, Cloneable {
      * @throws ExistingMovementException           if the movement already exists.
      * @throws DontIsInstallmentException          if the movement is not an installment plan.
      * @throws IllegalInstallmentQuantityException if the number of plots is less than 2.
-     *  @throws MovementAlreadyAccomplishException If the movement is already accomplished.
+     * @throws MovementAlreadyAccomplishException  If the movement is already accomplished.
+     * @throws InactiveMovementException           if you try to use an inactive movement as a parameter.
      */
     void addInstallment(IMovement movement, ERepetitionFrequency frequency, int numberOfInstallments);
 
@@ -99,10 +101,12 @@ public interface IWallet extends Serializable, Comparable<IWallet>, Cloneable {
      * Removes a movement from the wallet.
      *
      * @param movement to be removed.
-     * @throws NullArgumentException          if the argument is null.
-     * @throws NonExistentMovementException   if the movement does not exist in the wallet.
-     * @throws InstallmentWithoutHandlingMode if the movement is in installments.
-     * @throws MovementAlreadyAccomplishException If the movement is already accomplished.
+     * @throws NullArgumentException                   if the argument is null.
+     * @throws NonExistentMovementException            if the movement does not exist in the wallet.
+     * @throws InstallmentWithoutHandlingMode          if the movement is in installments.
+     * @throws MovementAlreadyAccomplishException      If the movement is already accomplished.
+     * @throws InactiveMovementException               if you try to use an inactive movement as a parameter.
+     * @throws AttemptedToUseExcludedMovementException if you try to use an already excluded movement as a parameter.
      */
     void removeMovement(IMovement movement);
 
@@ -111,10 +115,12 @@ public interface IWallet extends Serializable, Comparable<IWallet>, Cloneable {
      *
      * @param installment  to be removed.
      * @param handlingMode How the removal should take place.
-     * @throws NullArgumentException        if the argument is null.
-     * @throws NonExistentMovementException if the movement does not exist in the wallet.
-     * @throws DontIsInstallmentException   if the movement is not an installment plan.
-     * @throws MovementAlreadyAccomplishException If the movement is already accomplished.
+     * @throws NullArgumentException                   if the argument is null.
+     * @throws NonExistentMovementException            if the movement does not exist in the wallet.
+     * @throws DontIsInstallmentException              if the movement is not an installment plan.
+     * @throws MovementAlreadyAccomplishException      If the movement is already accomplished.
+     * @throws InactiveMovementException               if you try to use an inactive movement as a parameter.
+     * @throws AttemptedToUseExcludedMovementException if you try to use an already excluded movement as a parameter.
      */
     void removeInstallment(IMovement installment, EHandlingMode handlingMode);
 
@@ -122,24 +128,28 @@ public interface IWallet extends Serializable, Comparable<IWallet>, Cloneable {
      * Confirms a movement in the wallet, turning it into a transaction.
      *
      * @param movement to be confirmed.
-     * @throws NullArgumentException         if the argument is null.
-     * @throws NonExistentMovementException  if the movement does not exist in the wallet.
-     * @throws IllegalFormOfPaymentException if the form of payment does not exist in the wallet.
-     * @throws InsufficientFundsException    if the wallet does not have funds to support this transaction.
-     * @throws MovementAlreadyAccomplishException If the movement is already accomplished.
+     * @throws NullArgumentException                   if the argument is null.
+     * @throws NonExistentMovementException            if the movement does not exist in the wallet.
+     * @throws IllegalFormOfPaymentException           if the form of payment does not exist in the wallet.
+     * @throws InsufficientFundsException              if the wallet does not have funds to support this transaction.
+     * @throws MovementAlreadyAccomplishException      If the movement is already accomplished.
+     * @throws InactiveMovementException               if you try to use an inactive movement as a parameter.
+     * @throws AttemptedToUseExcludedMovementException if you try to use an already excluded movement as a parameter.
      */
     void confirmMovement(IMovement movement);
 
     /**
      * Confirms a movement in the wallet, turning it into a transaction.
      *
-     * @param movement to be confirmed.
+     * @param movement       to be confirmed.
      * @param accomplishDate to be confirmed.
-     * @throws NullArgumentException         if the argument is null.
-     * @throws NonExistentMovementException  if the movement does not exist in the wallet.
-     * @throws IllegalFormOfPaymentException if the form of payment does not exist in the wallet.
-     * @throws InsufficientFundsException    if the wallet does not have funds to support this transaction.
-     * @throws MovementAlreadyAccomplishException If the movement is already accomplished.
+     * @throws NullArgumentException                   if the argument is null.
+     * @throws NonExistentMovementException            if the movement does not exist in the wallet.
+     * @throws IllegalFormOfPaymentException           if the form of payment does not exist in the wallet.
+     * @throws InsufficientFundsException              if the wallet does not have funds to support this transaction.
+     * @throws MovementAlreadyAccomplishException      If the movement is already accomplished.
+     * @throws InactiveMovementException               if you try to use an inactive movement as a parameter.
+     * @throws AttemptedToUseExcludedMovementException if you try to use an already excluded movement as a parameter.
      */
     void confirmMovement(IMovement movement, LocalDate accomplishDate);
 
@@ -194,9 +204,11 @@ public interface IWallet extends Serializable, Comparable<IWallet>, Cloneable {
      * Update an movement.
      *
      * @param movement to be updated.
-     * @throws NullArgumentException          if the argument is null.
-     * @throws NonExistentMovementException   if the movement does not exist in the wallet.
-     * @throws InstallmentWithoutHandlingMode if the movement is in installments.
+     * @throws NullArgumentException                   if the argument is null.
+     * @throws NonExistentMovementException            if the movement does not exist in the wallet.
+     * @throws InstallmentWithoutHandlingMode          if the movement is in installments.
+     * @throws InactiveMovementException               if you try to use an inactive movement as a parameter.
+     * @throws AttemptedToUseExcludedMovementException if you try to use an already excluded movement as a parameter.
      */
     void updateMovement(IMovement movement);
 
@@ -205,9 +217,11 @@ public interface IWallet extends Serializable, Comparable<IWallet>, Cloneable {
      *
      * @param installment  to be updated.
      * @param handlingMode How the update should take place.
-     * @throws NullArgumentException        if the argument is null.
-     * @throws NonExistentMovementException if the movement does not exist in the wallet.
-     * @throws DontIsInstallmentException   if the movement is not an installment plan.
+     * @throws NullArgumentException                   if the argument is null.
+     * @throws NonExistentMovementException            if the movement does not exist in the wallet.
+     * @throws DontIsInstallmentException              if the movement is not an installment plan.
+     * @throws InactiveMovementException               if you try to use an inactive movement as a parameter.
+     * @throws AttemptedToUseExcludedMovementException if you try to use an already excluded movement as a parameter.
      */
     void updateInstallment(IMovement installment, EHandlingMode handlingMode);
 
