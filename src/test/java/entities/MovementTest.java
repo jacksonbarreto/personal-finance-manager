@@ -1,6 +1,7 @@
 package entities;
 
 import bll.entities.*;
+import bll.exceptions.AmountEqualZeroException;
 import bll.exceptions.InvalidNameSizeException;
 import bll.exceptions.NullArgumentException;
 import org.junit.jupiter.api.Test;
@@ -32,7 +33,6 @@ public class MovementTest {
 
     IMovement obj2 = makeMovement("English course", "22.30",
             LocalDate.of(1970, Month.JANUARY, 1), formOfPayment, payee, category2, DEBIT).build();
-
 
 
     @Test
@@ -93,32 +93,32 @@ public class MovementTest {
     }
 
     @Test
-    public void shouldToBeActive(){
+    public void shouldToBeActive() {
         assertTrue(obj1.isActive());
         assertFalse(obj1.isInactive());
     }
 
     @Test
-    public void shouldInactivateAMovement(){
+    public void shouldInactivateAMovement() {
         obj1.inactivate();
         assertTrue(obj1.isInactive());
         assertFalse(obj1.isActive());
     }
 
     @Test
-    public void shouldHaveRegistrationDate(){
+    public void shouldHaveRegistrationDate() {
         assertEquals(obj1.getRegistrationDate(), LocalDate.now());
         assertEquals(obj2.getRegistrationDate(), LocalDate.now());
     }
 
     @Test
-    public void shouldHaveNullAccomplishDate(){
+    public void shouldHaveNullAccomplishDate() {
         assertNull(obj1.getAccomplishDate());
         assertNull(obj2.getAccomplishDate());
     }
 
     @Test
-    public void shouldHaveAccomplishDate(){
+    public void shouldHaveAccomplishDate() {
         obj1.accomplish();
         assertEquals(LocalDate.now(), obj1.getAccomplishDate());
         obj2.accomplish(LocalDate.of(1970, Month.FEBRUARY, 2));
@@ -126,8 +126,8 @@ public class MovementTest {
     }
 
     @Test
-    public void shouldThrowExceptionByTryAccomplishWithNullDate(){
-        assertThrows(NullArgumentException.class, ()-> obj1.accomplish(null));
+    public void shouldThrowExceptionByTryAccomplishWithNullDate() {
+        assertThrows(NullArgumentException.class, () -> obj1.accomplish(null));
     }
 
     @Test
@@ -153,6 +153,11 @@ public class MovementTest {
         assertThrows(NullArgumentException.class, () -> obj1.updateAmount(null));
         obj2.updateAmount(new BigDecimal("92.40"));
         assertEquals(new BigDecimal("-92.40"), obj2.getAmount());
+    }
+
+    @Test
+    public void shouldThrowExceptionByTryUpdateAmountWithZero() {
+        assertThrows(AmountEqualZeroException.class, () -> obj1.updateAmount(BigDecimal.ZERO));
     }
 
     @Test
@@ -240,6 +245,7 @@ public class MovementTest {
         assertTrue(movement1.isRecurrent());
         assertFalse(obj1.isRecurrent());
     }
+
     @Test
     public void shouldIdentifyAInstallment() {
         IMovement movement1 = new Movement("Christmas shopping",

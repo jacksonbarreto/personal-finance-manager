@@ -396,6 +396,8 @@ public class Movement implements IMovement {
     public void updateAmount(BigDecimal newAmount) {
         if (newAmount == null)
             throw new NullArgumentException();
+        if (AMOUNT_IS_ZERO.test(newAmount))
+            throw new AmountEqualZeroException();
         this.amount = newAmount;
         normalizesAmount();
     }
