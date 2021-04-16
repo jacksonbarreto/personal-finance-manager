@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 @Entity
+@Table(name = "systemUser",uniqueConstraints = @UniqueConstraint(name = "unique_email", columnNames = {"email"}))
 public class User implements IUser {
     @Id
     private UUID ID;
@@ -30,11 +31,11 @@ public class User implements IUser {
     private List<ERole> roles;
     @Column(nullable = false, unique = true)
     private IEmail email;
-    @OneToMany(targetEntity = Wallet.class)
+    @OneToMany(targetEntity = Wallet.class, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<IWallet> wallets;
-    @OneToMany(targetEntity = Payee.class)
+    @OneToMany(targetEntity = Payee.class, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<IPayee> payees;
-    @OneToMany(targetEntity = MovementCategory.class)
+    @OneToMany(targetEntity = MovementCategory.class, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<IMovementCategory> categories;
 
     public User(String name, ICredential credential, List<EUserState> userStates, List<ERole> roles, IEmail email) {
@@ -56,7 +57,7 @@ public class User implements IUser {
         this.roles = new ArrayList<>();
         this.roles.addAll(roles);
         this.email = email;
-        this.wallets = new TreeSet<>();
+        this.wallets = new HashSet<>();
         this.payees = new HashSet<>();
         this.categories = new HashSet<>();
     }
@@ -181,7 +182,7 @@ public class User implements IUser {
      */
     @Override
     public Set<IWallet> getWallets() {
-        Set<IWallet> walletSet = new TreeSet<>();
+        Set<IWallet> walletSet = new HashSet<>();
         for (IWallet w : this.wallets)
             walletSet.add(w.clone());
         return walletSet;

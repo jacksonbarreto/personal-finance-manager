@@ -26,9 +26,9 @@ public class Wallet implements IWallet {
     @Column(nullable = false)
     private Currency currency;
     @Column(nullable = false)
-    @ManyToMany(targetEntity = FormOfPayment.class)
+    @ManyToMany(targetEntity = FormOfPayment.class, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Set<IFormOfPayment> formOfPayments;
-    @OneToMany(targetEntity = Movement.class)
+    @OneToMany(targetEntity = Movement.class, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<IMovement> movements;
     @JoinColumn(nullable = false)
     @OneToOne(targetEntity = Payee.class)

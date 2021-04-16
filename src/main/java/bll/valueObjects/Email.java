@@ -4,6 +4,7 @@ import java.util.Objects;
 
 import bll.exceptions.InvalidEmailFormatException;
 import bll.exceptions.NullArgumentException;
+import org.hibernate.annotations.Immutable;
 
 import javax.persistence.Embeddable;
 import javax.persistence.Transient;
@@ -12,6 +13,7 @@ import javax.persistence.Transient;
  * Implementation of the {@code IEmail} interface.
  */
 @Embeddable
+@Immutable
 final public class Email implements IEmail {
     private String localPart;
     private String domainName;

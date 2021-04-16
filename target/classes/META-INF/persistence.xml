@@ -8,7 +8,7 @@
 <persistence-unit name="PFM-PU">
 <properties>
     <property name="javax.persistence.jdbc.url" value="jdbc:sqlserver://localhost:1433;instanceName=EI24031;DatabaseName=pfm" />
-    <property name="javax.persistence.jdbc.user" value="sa" />
+    <property name="javax.persistence.jdbc.user" value="ei24031" />
     <property name="javax.persistence.jdbc.password" value="123456" />
     <property name="javax.persistence.jdbc.driver" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
 

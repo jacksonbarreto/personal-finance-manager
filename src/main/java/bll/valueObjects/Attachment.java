@@ -2,10 +2,12 @@ package bll.valueObjects;
 
 import bll.exceptions.EmptyArgumentException;
 import bll.exceptions.NullArgumentException;
+import org.hibernate.annotations.Immutable;
 
 import javax.persistence.Embeddable;
 import java.util.Objects;
 @Embeddable
+@Immutable
 final public class Attachment implements IAttachment {
 
     private String URI;
