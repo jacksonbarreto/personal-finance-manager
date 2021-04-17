@@ -6,6 +6,8 @@ import bll.valueObjects.Email;
 import bll.valueObjects.IEmail;
 import org.junit.jupiter.api.Test;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -419,8 +421,9 @@ public class UserTest {
     }
 
     @Test
-    public void shouldAddCategory() {
-        IMovementCategory t1 = new MovementCategory("Education");
+    public void shouldAddCategory() throws URISyntaxException {
+        URI uri1 = new URI("/rest.png");
+        IMovementCategory t1 = new MovementCategory("Education", uri1);
         assertTrue(obj1.getCategory().isEmpty());
         obj1.addCategory(t1);
         assertEquals(1, obj1.getCategory().size());
@@ -429,8 +432,9 @@ public class UserTest {
     }
 
     @Test
-    public void shouldThrowExceptionByTryAddExistingCategory() {
-        IMovementCategory t1 = new MovementCategory("Education");
+    public void shouldThrowExceptionByTryAddExistingCategory() throws URISyntaxException {
+        URI uri1 = new URI("/rest.png");
+        IMovementCategory t1 = new MovementCategory("Education", uri1);
         obj1.addCategory(t1);
         assertThrows(ExistingCategoryException.class, () -> obj1.addCategory(t1));
     }
@@ -441,14 +445,16 @@ public class UserTest {
     }
 
     @Test
-    public void shouldThrowExceptionByTryUpdateANonExistingCategory() {
-        IMovementCategory t1 = new MovementCategory("Education");
+    public void shouldThrowExceptionByTryUpdateANonExistingCategory() throws URISyntaxException {
+        URI uri1 = new URI("/rest.png");
+        IMovementCategory t1 = new MovementCategory("Education", uri1);
         assertThrows(NonExistingCategoryException.class, () -> obj1.updateCategory(t1));
     }
 
     @Test
-    public void shouldUpdateCategory() {
-        IMovementCategory t1 = new MovementCategory("Education");
+    public void shouldUpdateCategory() throws URISyntaxException {
+        URI uri1 = new URI("/rest.png");
+        IMovementCategory t1 = new MovementCategory("Education", uri1);
         obj1.addCategory(t1);
 
         t1.updateName("Food");

@@ -4,6 +4,7 @@ import bll.exceptions.InvalidNameSizeException;
 import bll.exceptions.NullArgumentException;
 
 import java.io.Serializable;
+import java.net.URI;
 import java.util.UUID;
 import java.util.function.Predicate;
 
@@ -43,15 +44,21 @@ public interface IMovementCategory extends Serializable {
      *
      * @return the URI of the image that represents the category.
      */
-    String getImgURI();
+    URI getImage();
 
     /**
      * Changes the URI for accessing the Category image.
      *
-     * @param newURI new URI for accessing the Category image.
+     * @param newImage
      */
-    void updateImgURI(String newURI);
+    void updateImage(URI newImage);
 
+    /**
+     * Returns true if the category is public.
+     *
+     * @return {@code true} if the category is public.
+     */
+    boolean isPublic();
 
     /**
      * Returns a string representation of the Category object.

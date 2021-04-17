@@ -7,6 +7,8 @@ import bll.valueObjects.IAttachment;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.UUID;
@@ -24,11 +26,15 @@ public class MovementBuilderTest {
     LocalDate dueDate = LocalDate.of(1985, Month.FEBRUARY, 10);
     IFormOfPayment formOfPayment = new FormOfPayment("Transfer");
     IPayee payee = new Payee("Continent");
-    IMovementCategory category = new MovementCategory("Education");
+    URI uri1 = new URI("/rest.png");
+    IMovementCategory category = new MovementCategory("Education",uri1);
     IAttachment attachment = new Attachment("www.college.pt");
     IMovementBuilder obj1 = IMovementBuilder.makeMovement(name, amount, dueDateText, formOfPayment, payee, category, CREDIT);
     IMovementBuilder obj2 = IMovementBuilder.makeMovement(name, amount, LocalDate.now(), formOfPayment, payee, category, CREDIT);
     IMovement movement = obj1.build();
+
+    public MovementBuilderTest() throws URISyntaxException {
+    }
 
     @Test
     public void shouldHaveCorrectName() {

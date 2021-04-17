@@ -7,6 +7,8 @@ import bll.exceptions.NullArgumentException;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.YearMonth;
@@ -24,15 +26,19 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class MovementTest {
     IPayee payee = new Payee("Continent");
+    URI uri1 = new URI("/rest.png");
     IFormOfPayment formOfPayment = new FormOfPayment("MB Way");
-    IMovementCategory category1 = new MovementCategory("Mercado");
-    IMovementCategory category2 = new MovementCategory("Education");
+    IMovementCategory category1 = new MovementCategory("Mercado", uri1);
+    IMovementCategory category2 = new MovementCategory("Education", uri1);
 
     IMovement obj1 = makeMovement("Christmas shopping", "33.50",
             LocalDate.now(), formOfPayment, payee, category1, CREDIT).build();
 
     IMovement obj2 = makeMovement("English course", "22.30",
             LocalDate.of(1970, Month.JANUARY, 1), formOfPayment, payee, category2, DEBIT).build();
+
+    public MovementTest() throws URISyntaxException {
+    }
 
 
     @Test

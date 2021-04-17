@@ -3,8 +3,10 @@ package bll.entities;
 import bll.exceptions.InvalidNameSizeException;
 import bll.exceptions.NullArgumentException;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import java.net.URI;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -12,28 +14,31 @@ import java.util.UUID;
 public class MovementCategory implements IMovementCategory {
     @Id
     private UUID id;
+    @Column(nullable = false)
     private String name;
-    private String imgURI;
+    private URI image;
     private boolean active;
+    private boolean publicCategory;
 
-    public MovementCategory(String name, String imgURI, boolean active) {
-        if (name == null || imgURI == null)
+    public MovementCategory(String name, URI image, boolean active, boolean publicCategory) {
+        if (name == null)
             throw new NullArgumentException();
         if (INCORRECT_NAME_SIZE.test(name.trim()))
             throw new InvalidNameSizeException();
         this.name = name.trim();
-        this.imgURI = imgURI.trim();
+        this.image = image;
         this.active = active;
         this.id = UUID.randomUUID();
+        this.publicCategory = publicCategory;
     }
 
-    public MovementCategory(String name, String imgURI) {
-        this(name, imgURI, true);
+    public MovementCategory(String name, URI image) {
+        this(name, image, true, true);
     }
-
     public MovementCategory(String name) {
-        this(name, "", true);
+        this(name, null, true, false);
     }
+
 
     public MovementCategory(IMovementCategory transactionCategory) {
         if (transactionCategory == null)
@@ -41,7 +46,7 @@ public class MovementCategory implements IMovementCategory {
         this.name = transactionCategory.getName();
         this.active = transactionCategory.isActive();
         this.id = transactionCategory.getID();
-        this.imgURI = transactionCategory.getImgURI();
+        this.image = transactionCategory.getImage();
     }
 
     /**
@@ -87,21 +92,28 @@ public class MovementCategory implements IMovementCategory {
      *
      * @return the URI of the image that represents the category.
      */
-    @Override
-    public String getImgURI() {
-        return this.imgURI;
+    public URI getImage() {
+        return this.image;
     }
 
     /**
      * Changes the URI for accessing the Category image.
      *
-     * @param newURI new URI for accessing the Category image.
+     * @param newImage
      */
     @Override
-    public void updateImgURI(String newURI) {
-        if (newURI == null)
-            throw new NullArgumentException();
-        this.imgURI = newURI.trim();
+    public void updateImage(URI newImage) {
+        this.image = newImage;
+    }
+
+    /**
+     * Returns true if the category is public.
+     *
+     * @return {@code true} if the category is public.
+     */
+    @Override
+    public boolean isPublic() {
+        return this.publicCategory;
     }
 
     /**
@@ -117,7 +129,7 @@ public class MovementCategory implements IMovementCategory {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         MovementCategory that = (MovementCategory) obj;
-        return active == that.active && name.equals(that.name) && Objects.equals(imgURI, that.imgURI) && id.equals(that.id);
+        return active == that.active && name.equals(that.name) && Objects.equals(image, that.image) && id.equals(that.id);
     }
 
     @Override
@@ -183,7 +195,7 @@ public class MovementCategory implements IMovementCategory {
     public String toString() {
         return "TransactionCategory{" +
                 "name='" + name + '\'' +
-                ", imgURI='" + imgURI + '\'' +
+                ", imgURI='" + image + '\'' +
                 ", id=" + id +
                 ", active=" + active +
                 '}';
@@ -200,8 +212,8 @@ public class MovementCategory implements IMovementCategory {
     }
 
     @SuppressWarnings("unused")
-    private void setImgURI(String imgURI) {
-        this.imgURI = imgURI;
+    private void setImage(URI imgURI) {
+        this.image = imgURI;
     }
 
     @SuppressWarnings("unused")

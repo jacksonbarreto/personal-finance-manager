@@ -6,20 +6,27 @@ import bll.exceptions.InvalidNameSizeException;
 import bll.exceptions.NullArgumentException;
 import org.junit.jupiter.api.Test;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class MovementCategoryTest {
-
+    URI uri1 = new URI("/rest.png");
+    URI uri2 = new URI("./assets/tax.png");
     IMovementCategory t1 = new MovementCategory("Educação");
-    IMovementCategory t2 = new MovementCategory("Restauração", "/rest.png", true);
+    IMovementCategory t2 = new MovementCategory("Restauração", null, true, true);
     IMovementCategory t3 = new MovementCategory(t1);
     IMovementCategory t4 = new MovementCategory(t3);
-    IMovementCategory t5 = new MovementCategory("Impostos", "./assets/tax.png");
+    IMovementCategory t5 = new MovementCategory("Impostos", uri2);
+
+    public MovementCategoryTest() throws URISyntaxException {
+    }
 
     @Test
     public void exceptionShouldBeRaisedForHavingANameLessThanTheMinimumSize() {
-        assertThrows(InvalidNameSizeException.class, () -> new MovementCategory("Xz"));
-        assertThrows(InvalidNameSizeException.class, () -> new MovementCategory(""));
+        assertThrows(InvalidNameSizeException.class, () -> new MovementCategory("Xz",uri1));
+        assertThrows(InvalidNameSizeException.class, () -> new MovementCategory("",uri1));
         assertThrows(InvalidNameSizeException.class, () -> t1.updateName("fV"));
         assertThrows(InvalidNameSizeException.class, () -> t4.updateName(""));
 
@@ -27,31 +34,23 @@ public class MovementCategoryTest {
 
     @Test
     public void exceptionShouldBeRaisedForHavingANameLessThanTheMaximumSize() {
-        assertThrows(InvalidNameSizeException.class, () -> new MovementCategory("ShouldBeRaisedForHavingANameLessThanTheMaximumSize"));
+        assertThrows(InvalidNameSizeException.class, () -> new MovementCategory("ShouldBeRaisedForHavingANameLessThanTheMaximumSize",uri1));
         assertThrows(InvalidNameSizeException.class, () -> t1.updateName("ShouldBeRaisedForHavingANameLessThanTheMaximumSize"));
         assertThrows(InvalidNameSizeException.class, () -> t4.updateName("ShouldBeRaisedForHavingANameLessThanTheMaximumSize"));
     }
 
     @Test
     public void shouldThrowExceptionByNullName() {
-        String nullValue = null;
-        assertThrows(NullArgumentException.class, () -> new MovementCategory(nullValue));
-        assertThrows(NullArgumentException.class, () -> t1.updateName(nullValue));
-        assertThrows(NullArgumentException.class, () -> t4.updateName(nullValue));
+        assertThrows(NullArgumentException.class, () -> new MovementCategory(null,uri1));
+        assertThrows(NullArgumentException.class, () -> t1.updateName(null));
+        assertThrows(NullArgumentException.class, () -> t4.updateName(null));
     }
 
-    @Test
-    public void shouldThrowExceptionByNullImgURI() {
-        String nullValue = null;
-        assertThrows(NullArgumentException.class, () -> new MovementCategory("Name", nullValue));
-        assertThrows(NullArgumentException.class, () -> t1.updateName(nullValue));
-        assertThrows(NullArgumentException.class, () -> t4.updateName(nullValue));
-    }
 
     @Test
     public void shouldThrowExceptionByNullTransactionCategory() {
-        IMovementCategory nullValue = null;
-        assertThrows(NullArgumentException.class, () -> new MovementCategory(nullValue));
+        IMovementCategory nullCategory = null;
+        assertThrows(NullArgumentException.class, () -> new MovementCategory(nullCategory));
     }
 
     @Test
@@ -90,18 +89,28 @@ public class MovementCategoryTest {
     }
 
     @Test
-    public void theImgURIShouldBeCorrect() {
-        assertEquals("", t1.getImgURI());
-        assertEquals("/rest.png", t2.getImgURI());
-        assertEquals("./assets/tax.png", t5.getImgURI());
-        assertEquals("", t3.getImgURI());
-        assertEquals("", t4.getImgURI());
+    public void shouldHaveVisibilityCorrect(){
+        assertTrue(t2.isPublic());
+        assertFalse(t1.isPublic());
+        assertFalse(t3.isPublic());
+        assertFalse(t4.isPublic());
+        assertTrue(t5.isPublic());
     }
 
     @Test
-    public void ShouldChangeImgURI(){
-        t1.updateImgURI("./img/tools.jpg");
-        assertEquals("./img/tools.jpg", t1.getImgURI());
+    public void theImgURIShouldBeCorrect() {
+        assertNull( t1.getImage());
+        assertNull(t2.getImage());
+        assertEquals(uri2, t5.getImage());
+        assertNull( t3.getImage());
+        assertNull(t4.getImage());
+    }
+
+    @Test
+    public void ShouldChangeImgURI() throws URISyntaxException {
+        URI newURI = new URI("./img/tools.jpg");
+        t1.updateImage(newURI);
+        assertEquals(newURI, t1.getImage());
     }
 
     @Test

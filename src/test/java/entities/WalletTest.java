@@ -5,6 +5,8 @@ import bll.exceptions.*;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.Year;
@@ -27,13 +29,17 @@ public class WalletTest {
             Currency.getInstance(Locale.getDefault()), Collections.singleton(formOfPayment1), payeeFormat);
     IPayee payee = new Payee("Continent");
     IFormOfPayment formOfPayment2 = new FormOfPayment("Transfer");
-    IMovementCategory category1 = new MovementCategory("Mercado");
-    IMovementCategory category2 = new MovementCategory("Education");
+    URI uri1 = new URI("/rest.png");
+    IMovementCategory category1 = new MovementCategory("Mercado", uri1);
+    IMovementCategory category2 = new MovementCategory("Education", uri1);
     IMovement movement1 = makeMovement("Christmas shopping", "33.50",
             LocalDate.now(), formOfPayment1, payee, category1, DEBIT).build();
 
     IMovement movement2 = makeMovement("salary", "122.30",
             LocalDate.of(1970, Month.JANUARY, 1), formOfPayment1, payee, category2, CREDIT).build();
+
+    public WalletTest() throws URISyntaxException {
+    }
 
     @Test
     public void shouldThrowExceptionBySmallName() {
