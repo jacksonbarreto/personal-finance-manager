@@ -10,8 +10,6 @@ public class testHibernate {
                 = Persistence.createEntityManagerFactory("PFM-PU");
         EntityManager entityManager = entityManagerFactory.createEntityManager();
 
-
-
         entityManager.close();
         entityManagerFactory.close();
     }
