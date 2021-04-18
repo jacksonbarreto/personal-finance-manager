@@ -11,6 +11,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 
+import static bll.enumerators.ERole.ADMIN;
+import static bll.services.PermissionService.permissionServiceDefault;
+
 public class MovementCategoryRepository implements IMovementCategoryRepository {
     private final IDAO<IMovementCategory> categoryDAO;
 
@@ -41,7 +44,11 @@ public class MovementCategoryRepository implements IMovementCategoryRepository {
     public Set<IMovementCategory> get(Predicate<IMovementCategory> predicate) {
         if (predicate == null)
             throw new NullArgumentException();
-        return categoryDAO.select(predicate);
+        Set<IMovementCategory> categoryFound = new HashSet<>();
+        for (IMovementCategory category : getAll())
+            if (predicate.test(category))
+                categoryFound.add(category);
+        return categoryFound;
     }
 
     @Override
@@ -53,20 +60,29 @@ public class MovementCategoryRepository implements IMovementCategoryRepository {
     public void add(IMovementCategory element) {
         if (element == null)
             throw new NullArgumentException();
-        categoryDAO.create(element);
+        Predicate<IMovementCategory> predicate = IMovementCategory::isPublic;
+        Set<IMovementCategory> publicCategory = get(predicate);
+        if (permissionServiceDefault().hasRole(SessionService.getCurrentUser(), ADMIN) && element.isPublic()) {
+            if (!publicCategory.contains(element))
+                categoryDAO.create(element);
+        }
     }
 
     @Override
     public void update(IMovementCategory element) {
         if (element == null)
             throw new NullArgumentException();
-        categoryDAO.update(element);
+        if (permissionServiceDefault().hasRole(SessionService.getCurrentUser(), ADMIN) && element.isPublic())
+            categoryDAO.update(element);
     }
 
     @Override
     public void remove(IMovementCategory element) {
         if (element == null)
             throw new NullArgumentException();
-        categoryDAO.delete(element);
+        if (permissionServiceDefault().hasRole(SessionService.getCurrentUser(), ADMIN) && element.isPublic()) {
+            element.inactivate();
+            categoryDAO.update(element);
+        }
     }
 }
