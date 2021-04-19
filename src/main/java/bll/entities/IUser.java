@@ -213,6 +213,15 @@ public interface IUser extends Serializable {
     void updateCategory(IMovementCategory category);
 
     /**
+     * Removes the indicated category.
+     *
+     * @param category to be removed.
+     * @throws NullArgumentException        if the parameter is null.
+     * @throws NonExistingCategoryException if you try to update a category that doesn't exist.
+     */
+    void removeCategory(IMovementCategory category);
+
+    /**
      * Indicates whether some other User is "equal to" this one.
      * <p>
      * It is only the same when both objects have ID equal.

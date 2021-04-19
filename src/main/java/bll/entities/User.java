@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 @Entity
-@Table(name = "systemUser",uniqueConstraints = @UniqueConstraint(name = "unique_email", columnNames = {"email"}))
+@Table(name = "systemUser", uniqueConstraints = @UniqueConstraint(name = "unique_email", columnNames = {"email"}))
 public class User implements IUser {
     @Id
     private UUID ID;
@@ -377,7 +377,8 @@ public class User implements IUser {
     public Set<IMovementCategory> getCategory() {
         Set<IMovementCategory> categorySet = new HashSet<>();
         for (IMovementCategory c : this.categories)
-            categorySet.add(c.clone());
+            if (c.isActive())
+                categorySet.add(c.clone());
         return categorySet;
     }
 
@@ -411,8 +412,25 @@ public class User implements IUser {
             throw new NullArgumentException();
         if (!this.categories.contains(category))
             throw new NonExistingCategoryException();
-        this.categories.remove(category);
-        this.categories.add(category.clone());
+        IMovementCategory categoryToUpdate = fetchCategory(category);
+        categoryToUpdate.updateName(category.getName());
+    }
+
+    /**
+     * Removes the indicated category.
+     *
+     * @param category to be removed.
+     * @throws NullArgumentException        if the parameter is null.
+     * @throws NonExistingCategoryException if you try to update a category that doesn't exist.
+     */
+    @Override
+    public void removeCategory(IMovementCategory category) {
+        if (category == null)
+            throw new NullArgumentException();
+        if (!this.categories.contains(category))
+            throw new NonExistingCategoryException();
+        IMovementCategory categoryToRemove = fetchCategory(category);
+        categoryToRemove.inactivate();
     }
 
     /**
@@ -476,6 +494,17 @@ public class User implements IUser {
     @Override
     public int hashCode() {
         return Objects.hash(ID);
+    }
+
+
+    private IMovementCategory fetchCategory(IMovementCategory category) {
+        IMovementCategory foundCategory = null;
+        for (IMovementCategory c : this.categories)
+            if (c.equals(category)) {
+                foundCategory = c;
+                break;
+            }
+        return foundCategory;
     }
 
     protected User() {
