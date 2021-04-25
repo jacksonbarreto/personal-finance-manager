@@ -6,15 +6,18 @@ import javafx.stage.Stage;
 
 import static view.WindowUtilities.configureWindow;
 
-
-public class Main extends Application {
+public class Dashboard extends Application {
     private static Stage stage;
     private static double xOffset;
     private static double yOffset;
 
+    public static void main(String[] args) {
+        launch(args);
+    }
+
     @Override
-    public void start(Stage primaryStage) throws Exception {
-        Parent root = configureWindow("/pages/main.fxml", primaryStage, Main.class);
+    public void start(Stage primaryStage) throws Exception{
+        Parent root = configureWindow("/pages/dashboard.fxml", primaryStage, Dashboard.class);
 
         root.setOnMousePressed(event -> {
             xOffset = event.getSceneX();
@@ -24,27 +27,15 @@ public class Main extends Application {
             primaryStage.setX(event.getScreenX() - xOffset);
             primaryStage.setY(event.getScreenY() - yOffset);
         });
-
     }
 
-    public static void setStage(Stage stage) {
-        Main.stage = stage;
+    public static void setStage(Stage stage){
+        Dashboard.stage = stage;
     }
 
-    public static Stage getStage() {
+    public static Stage getStage(){
         return stage;
     }
-
-    public static void close() {
-        stage.close();
-    }
-
-    public static void minimize() {
-        stage.setIconified(true);
-    }
-
-    public static void main(String[] args) {
-        launch(args);
-    }
-
+    public static void close(){stage.close();}
+    public static void minimize(){stage.setIconified(true);}
 }
