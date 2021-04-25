@@ -37,7 +37,7 @@ public class SessionService {
     }
 
     public static IUser getCurrentUser() {
-        return getInstance().currentUser.clone();
+        return getInstance().currentUser == null ? null : getInstance().currentUser.clone();
     }
 
     public static void addUserInSession(IUser user) {

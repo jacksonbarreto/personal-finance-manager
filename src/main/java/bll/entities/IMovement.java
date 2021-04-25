@@ -24,6 +24,17 @@ public interface IMovement extends Serializable, Comparable<IMovement>, Cloneabl
     Predicate<String> INCORRECT_NAME_SIZE = (s) -> (s.length() < MINIMUM_NAME_SIZE || s.length() > MAXIMUM_NAME_SIZE);
     Predicate<String> INCORRECT_DESCRIPTION_SIZE = (s) -> !s.isEmpty() && (s.length() < MINIMUM_DESCRIPTION_SIZE || s.length() > MAXIMUM_DESCRIPTION_SIZE);
     Comparator<IMovement> COMPARE_FOR_AMOUNT = Comparator.comparing(IMovement::getAmount);
+
+
+    /**
+     * Updates all its attributes from an external copy.
+     *
+     * @param externalCopy of the original element.
+     * @throws DifferentObjectException if the object sent does not have the same id.
+     * @throws NullArgumentException    if the argument is null.
+     */
+    void autoUpdate(IMovement externalCopy);
+
     /**
      * Returns the unique identifier of the Operation.
      *

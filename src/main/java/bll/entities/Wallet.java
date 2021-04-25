@@ -29,9 +29,10 @@ public class Wallet implements IWallet {
     @ManyToMany(targetEntity = FormOfPayment.class, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Set<IFormOfPayment> formOfPayments;
     @OneToMany(targetEntity = Movement.class, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "wallet")
     private Set<IMovement> movements;
     @JoinColumn(nullable = false)
-    @OneToOne(targetEntity = Payee.class)
+    @OneToOne(targetEntity = Payee.class, cascade = CascadeType.ALL, orphanRemoval = true)
     private IPayee payeeFormat;
 
     public Wallet(String name, String description, Currency currency,
@@ -73,6 +74,45 @@ public class Wallet implements IWallet {
         this.payeeFormat = wallet.getPayeeFormat();
     }
 
+
+    @Override
+    public void autoUpdate(IWallet externalCopy) {
+        if (externalCopy == null)
+            throw new NullArgumentException();
+        if (this.ID.equals(externalCopy.getID())) {
+            this.updateName(externalCopy.getName());
+            this.description = externalCopy.getDescription();
+            this.currency = externalCopy.getCurrency();
+            for(IFormOfPayment f : this.formOfPayments){
+                for(IFormOfPayment fExternal : externalCopy.getFormOfPayment()){
+                    if (fExternal.equals(f)){
+                        f.autoUpdate(fExternal);
+                        break;
+                    }
+                }
+            }
+            for(IFormOfPayment f : externalCopy.getFormOfPayment()){
+                if (!this.formOfPayments.contains(f)){
+                   this.formOfPayments.add(f.clone());
+                }
+            }
+            this.formOfPayments.retainAll(externalCopy.getFormOfPayment());
+
+            for (IMovement m : externalCopy.getMovements())
+                this.movements.add(m.clone());
+
+            for (IMovement m : this.movements){
+                for (IMovement mExternal : externalCopy.getMovements()){
+                    if (m.equals(mExternal)){
+                        m.autoUpdate(mExternal);
+                        break;
+                    }
+                }
+            }
+
+            this.movements = copyMovements(externalCopy.getMovements());
+        }
+    }
 
     /**
      * Returns the unique identifier of the wallet.

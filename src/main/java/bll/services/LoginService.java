@@ -2,6 +2,8 @@ package bll.services;
 
 import bll.entities.IUser;
 import bll.enumerators.EUserState;
+import bll.exceptions.AccessDeniedBlockedUserException;
+import bll.exceptions.AccessDeniedUnconfirmedEmailException;
 import bll.exceptions.NullArgumentException;
 import bll.repositories.UserRepository;
 
@@ -23,10 +25,10 @@ public class LoginService implements ILoginService {
             throw new NullArgumentException();
 
         if (user.getUserStates().contains(WAITING_FOR_EMAIL_CONFIRMATION))
-            return false;
+            throw new AccessDeniedUnconfirmedEmailException();
 
         if (user.getUserStates().contains(BLOCKED_BY_MANY_INVALID_LOGIN_ATTEMPT))
-            return false;
+            throw new AccessDeniedBlockedUserException();
 
         if (user.getUserStates().contains(INACTIVE))
             return false;

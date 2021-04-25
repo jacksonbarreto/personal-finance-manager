@@ -26,6 +26,14 @@ public interface IWallet extends Serializable, Comparable<IWallet>, Cloneable {
     Comparator<IWallet> COMPARE_BY_ESTIMATED_BALANCE = Comparator.comparing(IWallet::getBalanceExpected);
 
     /**
+     * Updates all its attributes from an external copy.
+     *
+     * @param externalCopy of the original element.
+     * @throws DifferentObjectException if the object sent does not have the same id.
+     * @throws NullArgumentException    if the argument is null.
+     */
+    void autoUpdate(IWallet externalCopy);
+    /**
      * Returns the unique identifier of the wallet.
      *
      * @return the unique identifier of the wallet.

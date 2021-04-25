@@ -18,24 +18,25 @@ public class User implements IUser {
     private String name;
     @Column(nullable = false)
     private LocalDate registrationDate;
-    @OneToOne(targetEntity = Credential.class)
+    @OneToOne(targetEntity = Credential.class, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(nullable = false)
     private ICredential credential;
     @ElementCollection(fetch = FetchType.EAGER)
-    @Enumerated
     @Column(nullable = false)
     private List<EUserState> userStates;
     @ElementCollection(fetch = FetchType.LAZY)
-    @Enumerated
     @Column(nullable = false)
     private List<ERole> roles;
     @Column(nullable = false, unique = true)
     private IEmail email;
     @OneToMany(targetEntity = Wallet.class, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "systemUser")
     private Set<IWallet> wallets;
     @OneToMany(targetEntity = Payee.class, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "systemUser")
     private Set<IPayee> payees;
     @OneToMany(targetEntity = MovementCategory.class, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "systemUser")
     private Set<IMovementCategory> categories;
 
     public User(String name, ICredential credential, List<EUserState> userStates, List<ERole> roles, IEmail email) {
@@ -283,9 +284,8 @@ public class User implements IUser {
             throw new NullArgumentException();
         if (!this.wallets.contains(wallet))
             throw new NonExistentWalletException();
-
-        this.wallets.remove(wallet);
-        this.wallets.add(wallet.clone());
+        IWallet walletToUpdate = fetchWallet(wallet);
+        walletToUpdate.autoUpdate(wallet);
     }
 
     /**
@@ -505,6 +505,16 @@ public class User implements IUser {
                 break;
             }
         return foundCategory;
+    }
+
+    private IWallet fetchWallet(IWallet wallet){
+        IWallet foundWallet = null;
+        for(IWallet w : this.wallets)
+            if (w.equals(wallet)){
+                foundWallet = w;
+                break;
+            }
+        return foundWallet;
     }
 
     protected User() {

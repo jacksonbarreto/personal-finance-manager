@@ -8,6 +8,7 @@ import dal.infra.UserDAO;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class UserRepository implements IUserRepository {
     private final IDAO<IUser> userDAO;
@@ -31,15 +32,14 @@ public class UserRepository implements IUserRepository {
     public Set<IUser> get(Predicate<IUser> predicate) {
         if (predicate == null)
             throw new NullArgumentException();
-
-        return userDAO.select(predicate);
+        return userDAO.selectAll().stream().filter(predicate).collect(Collectors.toSet());
     }
 
     @Override
     public IUser getFirst(Predicate<IUser> predicate) {
         if (predicate == null)
             throw new NullArgumentException();
-        return (IUser) userDAO.select(predicate).toArray()[0];
+        return userDAO.selectAll().stream().filter(predicate).findFirst().orElse(null);
     }
 
     @Override

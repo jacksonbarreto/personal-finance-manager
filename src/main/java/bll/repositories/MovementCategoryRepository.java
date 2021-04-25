@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import static bll.enumerators.ERole.ADMIN;
 import static bll.services.PermissionService.permissionServiceDefault;
@@ -35,7 +36,7 @@ public class MovementCategoryRepository implements IMovementCategoryRepository {
     public Set<IMovementCategory> getAll() {
         Set<IMovementCategory> allCategories = new HashSet<>();
         Predicate<IMovementCategory> predicate = category -> category.isActive() && category.isPublic();
-        allCategories.addAll(categoryDAO.select(predicate));
+        allCategories.addAll(categoryDAO.selectAll().stream().filter(predicate).collect(Collectors.toSet()));
         allCategories.addAll(SessionService.getCurrentUser().getCategory());
         return allCategories;
     }

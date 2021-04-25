@@ -60,7 +60,7 @@ public class AuthenticationService implements IAuthenticationService {
                 if (!user.getRoles().contains(role))
                     return false;
             }
-            return getCurrentUser().equals(user) && getCurrentUser().getCredential().equals(user.getCredential());
+            return getCurrentUser() != null && getCurrentUser().equals(user) && getCurrentUser().getCredential().equals(user.getCredential());
         }
         return false;
     }
@@ -70,7 +70,7 @@ public class AuthenticationService implements IAuthenticationService {
         return isAuthenticated(user, new HashSet<>());
     }
 
-    static IAuthenticationService authenticationServiceDefault() {
+    public static IAuthenticationService authenticationServiceDefault() {
         return new AuthenticationService(identificationServiceDefault(), permissionServiceDefault(), LoginServiceDefault());
     }
 }

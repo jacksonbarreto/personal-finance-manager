@@ -1,5 +1,6 @@
 package bll.entities;
 
+import bll.exceptions.DifferentObjectException;
 import bll.exceptions.InvalidNameSizeException;
 import bll.exceptions.NullArgumentException;
 
@@ -47,6 +48,25 @@ public class MovementCategory implements IMovementCategory {
         this.active = transactionCategory.isActive();
         this.id = transactionCategory.getID();
         this.image = transactionCategory.getImage();
+    }
+
+    /**
+     * Updates all its attributes from an external copy.
+     *
+     * @param externalCopy of the original element.
+     * @throws DifferentObjectException if the object sent does not have the same id.
+     * @throws NullArgumentException    if the argument is null.
+     */
+    @Override
+    public void autoUpdate(IMovementCategory externalCopy) {
+        if (externalCopy == null)
+            throw new NullArgumentException();
+        if (!this.id.equals(externalCopy.getID()))
+            throw new DifferentObjectException();
+
+        this.name = externalCopy.getName();
+        this.active = externalCopy.isActive();
+        this.image = externalCopy.getImage();
     }
 
     /**

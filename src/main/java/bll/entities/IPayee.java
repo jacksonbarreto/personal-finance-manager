@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.UUID;
 import java.util.function.Predicate;
 
+import bll.exceptions.DifferentObjectException;
 import bll.exceptions.InvalidNameSizeException;
 import bll.exceptions.NullArgumentException;
 
@@ -12,6 +13,16 @@ public interface IPayee extends Serializable {
     int MINIMUM_NAME_SIZE = 3;
     int MAXIMUM_NAME_SIZE = 30;
     Predicate<String> INCORRECT_NAME_SIZE = (s) -> (s.length() < MINIMUM_NAME_SIZE || s.length() > MAXIMUM_NAME_SIZE);
+
+    /**
+     * Updates all its attributes from an external copy.
+     *
+     * @param externalCopy of the original element.
+     * @throws DifferentObjectException if the object sent does not have the same id.
+     * @throws NullArgumentException    if the argument is null.
+     */
+    void autoUpdate(IPayee externalCopy);
+
     /**
      * Returns the name of the payee.
      *

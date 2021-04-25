@@ -4,6 +4,7 @@ import bll.enumerators.EOperationType;
 import bll.enumerators.ERepetitionFrequency;
 import bll.exceptions.*;
 import bll.valueObjects.IAttachment;
+import dal.converters.ERepetitionFrequencyConverter;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -28,21 +29,19 @@ public class Movement implements IMovement {
     @Column(nullable = false)
     private LocalDate dueDate;
     @JoinColumn(nullable = false)
-    @OneToOne(targetEntity = FormOfPayment.class)
+    @OneToOne(targetEntity = FormOfPayment.class, cascade = {CascadeType.PERSIST})
     private IFormOfPayment formOfPayment;
     @JoinColumn(nullable = false)
-    @OneToOne(targetEntity = Payee.class)
+    @OneToOne(targetEntity = Payee.class, cascade = {CascadeType.PERSIST})
     private IPayee payee;
     @JoinColumn(nullable = false)
-    @OneToOne(targetEntity = MovementCategory.class)
+    @OneToOne(targetEntity = MovementCategory.class, cascade = {CascadeType.PERSIST})
     private IMovementCategory category;
     @ElementCollection
     private Set<IAttachment> attachments;
     @Column(nullable = false)
-    @Enumerated
     private EOperationType movementType;
     @Column(nullable = false)
-    @Enumerated
     private ERepetitionFrequency frequency;
     @Column(nullable = false)
     private UUID groupID;
@@ -132,6 +131,37 @@ public class Movement implements IMovement {
         this.active = movement.isActive();
     }
 
+
+    /**
+     * Updates all its attributes from an external copy.
+     *
+     * @param externalCopy of the original element.
+     * @throws DifferentObjectException if the object sent does not have the same id.
+     * @throws NullArgumentException    if the argument is null.
+     */
+    @Override
+    public void autoUpdate(IMovement externalCopy) {
+        if (externalCopy == null)
+            throw new NullArgumentException();
+        if (!this.ID.equals(externalCopy.getID()))
+            throw new DifferentObjectException();
+
+        this.name = externalCopy.getName();
+        this.description = externalCopy.getDescription();
+        this.amount = externalCopy.getAmount();
+        this.dueDate = externalCopy.getDueDate();
+        this.formOfPayment.autoUpdate(externalCopy.getFormOfPayment());
+        this.payee.autoUpdate(externalCopy.getPayee());
+        this.category.autoUpdate(externalCopy.getCategory());
+        this.groupID = externalCopy.getGroupID();
+        this.movementType = externalCopy.isCredit() ? CREDIT : DEBIT;
+        this.frequency = externalCopy.getRepetitionFrequency();
+        this.accomplished = externalCopy.isAccomplished();
+        this.accomplishDate = externalCopy.getAccomplishDate();
+        this.active = externalCopy.isActive();
+        this.attachments.addAll(externalCopy.getAttachments());
+        this.attachments.retainAll(externalCopy.getAttachments());
+    }
 
     /**
      * Returns the unique identifier of the Movement.

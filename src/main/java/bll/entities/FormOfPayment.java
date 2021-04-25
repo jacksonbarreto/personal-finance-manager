@@ -1,5 +1,6 @@
 package bll.entities;
 
+import bll.exceptions.DifferentObjectException;
 import bll.exceptions.InvalidNameSizeException;
 import bll.exceptions.NullArgumentException;
 
@@ -34,6 +35,17 @@ public class FormOfPayment implements IFormOfPayment {
         this.name = formOfPayment.getName();
         this.active = formOfPayment.isActive();
         this.id = formOfPayment.getID();
+    }
+
+    @Override
+    public void autoUpdate(IFormOfPayment externalCopy) {
+        if (externalCopy == null)
+            throw new NullArgumentException();
+        if (!this.id.equals(externalCopy.getID()))
+            throw new DifferentObjectException();
+
+        this.name = externalCopy.getName();
+        this.active = externalCopy.isActive();
     }
 
     /**

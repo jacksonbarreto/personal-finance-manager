@@ -187,10 +187,10 @@ public class UserTest {
 
     @Test
     public void shouldRemoveUserState() {
-        obj1.addUserState(BLOCKED_BY_INVALID_PASSWORD);
+        obj1.addUserState(BLOCKED_BY_MANY_INVALID_LOGIN_ATTEMPT);
         obj1.removeUserState(ACTIVE);
         assertEquals(1, obj1.getUserStates().size());
-        assertTrue(obj1.getUserStates().contains(BLOCKED_BY_INVALID_PASSWORD));
+        assertTrue(obj1.getUserStates().contains(BLOCKED_BY_MANY_INVALID_LOGIN_ATTEMPT));
     }
 
     @Test
@@ -462,6 +462,35 @@ public class UserTest {
 
         obj1.updateCategory(t1);
         assertTrue(t1.isDeepEquals(new ArrayList<>(obj1.getCategory()).get(0)));
+    }
+
+    @Test
+    public void shouldRemoveCategory() throws URISyntaxException {
+        URI uri1 = new URI("/rest.png");
+        IMovementCategory t1 = new MovementCategory("Education", uri1);
+        IMovementCategory t2 = new MovementCategory("Food", null);
+        obj1.addCategory(t1);
+        obj1.addCategory(t2);
+        assertEquals(2, obj1.getCategory().size());
+        assertTrue(obj1.getCategory().contains(t1));
+        assertTrue(obj1.getCategory().contains(t2));
+        obj1.removeCategory(t1);
+        assertEquals(1, obj1.getCategory().size());
+        assertFalse(obj1.getCategory().contains(t1));
+        assertTrue(obj1.getCategory().contains(t2));
+        obj1.removeCategory(t2);
+        assertTrue(obj1.getCategory().isEmpty());
+    }
+
+    @Test
+    public void shouldThrowExceptionByTryRemoveCategoryWithNullCategory() {
+        assertThrows(NullArgumentException.class, () -> obj1.removeCategory(null));
+    }
+
+    @Test
+    public void shouldThrowExceptionByTryRemoveANonExistingCategory() {
+        IMovementCategory t1 = new MovementCategory("Education", null);
+        assertThrows(NonExistingCategoryException.class, () -> obj1.removeCategory(t1));
     }
 
     @Test
