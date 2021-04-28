@@ -5,18 +5,20 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.layout.HBox;
 import javafx.util.Callback;
 
+import java.util.function.Supplier;
 
 public class TableColumnButtonsFactory<S> {
 
-    private final HBox buttons;
-    private final TableColumn<S, HBox> column;
+    private final Supplier<HBox> buttonFactory;
+    private final String columnName;
 
-    public TableColumnButtonsFactory(TableColumn<S, HBox> column, HBox buttons) {
-        this.buttons = buttons;
-        this.column = column;
+    public TableColumnButtonsFactory(String columnName, Supplier<HBox> buttonFactory) {
+        this.buttonFactory = buttonFactory;
+        this.columnName = columnName;
     }
 
     public TableColumn<S, HBox> getColumn() {
+        final TableColumn<S, HBox> column = new TableColumn<>(columnName);
         Callback<TableColumn<S, HBox>, TableCell<S, HBox>> cellFactory = new Callback<>() {
 
             @Override
@@ -28,12 +30,12 @@ public class TableColumnButtonsFactory<S> {
                         if (empty)
                             setGraphic(null);
                         else
-                            setGraphic(buttons);
+                            setGraphic(buttonFactory.get());
                     }
                 };
             }
         };
-        this.column.setCellFactory(cellFactory);
-        return this.column;
+        column.setCellFactory(cellFactory);
+        return column;
     }
 }
