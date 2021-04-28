@@ -4,6 +4,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -31,6 +32,26 @@ public class WindowUtilities {
             e.printStackTrace();
         }
         return root;
+    }
+
+    private static FXMLLoader getScreen(Class<?> originClass, String screen) {
+        if (screen == null)
+            throw new IllegalArgumentException();
+        return new FXMLLoader(originClass.getResource("/pages/" + screen + ".fxml"));
+    }
+
+    private static Parent getLoader(FXMLLoader loader) {
+        Parent content = null;
+        try {
+            content = loader.load();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return content;
+    }
+
+    public static void loadScreenInCenter(Class<?> originClass, String screen, BorderPane borderPane) {
+        borderPane.setCenter(getLoader(getScreen(originClass, screen)));
     }
 
 }
