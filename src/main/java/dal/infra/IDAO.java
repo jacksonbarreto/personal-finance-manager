@@ -18,7 +18,7 @@ public interface IDAO<T>{
     void delete(T element);
 
     static EntityManager getEntityManager() {
-        EntityManagerFactory factory = null;
+        EntityManagerFactory factory;
         EntityManager entityManager = null;
         try {
             factory = createEntityManagerFactory("PFM-PU");
