@@ -1,0 +1,110 @@
+.table-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0px;
+    -fx-padding: 5px;
+}
+
+.table-button:hover {
+    -fx-background-color: #dfe4ea;
+}
+
+.table-button:armed {
+    -fx-background-color: #ced6e0;
+}
+
+.table-button-danger {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0px;
+    -fx-padding: 5px;
+}
+
+.table-button-danger:hover {
+    -fx-background-color: #e84118;
+}
+
+.table-button-danger:armed {
+    -fx-background-color: #c23616;
+}
+
+.table-view {
+    -fx-border-color: white;
+}
+
+.table-column {
+    -fx-border-color: white white #aaa69d white;
+    -fx-border-width: 0 0 1 0;
+    -fx-alignment: bottom-left;
+    -fx-min-height: 50px;
+}
+
+.table-view .column-header,
+.table-view .column-header .filler,
+.table-view .column-header-background .filler {
+    -fx-background-color: white;
+    -fx-border-color: white;
+    -fx-border-width: 0px;
+    -fx-max-height: 0px;
+    -fx-pref-height: 0px;
+    -fx-min-height: 0px;
+}
+
+.table-view .corner {
+    -fx-background-color: transparent;
+}
+
+.column-header-background {
+    -fx-max-height: 0px;
+    -fx-pref-height: 0px;
+    -fx-min-height: 0px;
+}
+
+.table-cell {
+    -fx-text-fill: black;
+    -fx-font-size: 14px;
+    -fx-background-color: white;
+}
+
+.table-cell:empty {
+    -fx-background-color: white;
+    -fx-border-width: 0px;
+    -fx-border-color: white;
+}
+
+.table-row-cell:empty {
+    -fx-border-width: 0px;
+    -fx-border-color: white;
+}
+
+.table-view *.scroll-bar:horizontal *.increment-button,
+.table-view *.scroll-bar:horizontal *.decrement-button {
+    -fx-background-color: null;
+    -fx-background-radius: 0;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+.table-view *.scroll-bar:horizontal *.increment-arrow,
+.table-view *.scroll-bar:horizontal *.decrement-arrow {
+    -fx-background-color: null;
+    -fx-background-radius: 0;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+    -fx-shape: null;
+}
+
+.table-view .scroll-bar:vertical {
+    -fx-font-size: 8;
+}
+
+.table-view .virtual-flow .scroll-bar:vertical,
+.table-view .virtual-flow .scroll-bar:vertical .track,
+.table-view .virtual-flow .scroll-bar:vertical .track-background {
+    -fx-background-color: transparent;
+    -fx-padding: 0 0 0 10px;
+
+}
+
+.table-view .virtual-flow .scroll-bar:vertical .thumb {
+    -fx-background-color: #276955;
+
+}
