@@ -29,18 +29,27 @@ public class SessionService {
         return INSTANCE;
     }
 
+    private void keepsSessionActive() {
+        this.lastInteraction = Instant.now();
+    }
+
     public static boolean isValid() {
         if (getInstance().currentUser == null)
             return false;
         Duration interval = Duration.between(getInstance().lastInteraction, Instant.now());
-        getInstance().lastInteraction = Instant.now();
         return interval.getSeconds() <= (INACTIVITY_ALLOWED_IN_MINUTES * SECONDS);
+    }
+
+    public static void keepActive() {
+        if (getInstance().currentUser == null)
+            throw new NonExistentSessionException();
+        getInstance().keepsSessionActive();
     }
 
     public static IUser getCurrentUser() {
         if (getInstance().currentUser == null)
             throw new NonExistentSessionException();
-
+        getInstance().keepsSessionActive();
         return getInstance().currentUser.clone();
     }
 
