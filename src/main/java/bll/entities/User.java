@@ -413,7 +413,7 @@ public class User implements IUser {
         if (!this.categories.contains(category))
             throw new NonExistingCategoryException();
         IMovementCategory categoryToUpdate = fetchCategory(category);
-        categoryToUpdate.updateName(category.getName());
+        categoryToUpdate.autoUpdate(category);
     }
 
     /**
