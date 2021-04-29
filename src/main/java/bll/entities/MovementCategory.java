@@ -51,6 +51,7 @@ public class MovementCategory implements IMovementCategory {
         this.active = transactionCategory.isActive();
         this.id = transactionCategory.getID();
         this.image = transactionCategory.getImage();
+        this.publicCategory = transactionCategory.isPublic();
     }
 
     /**
@@ -152,7 +153,7 @@ public class MovementCategory implements IMovementCategory {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         MovementCategory that = (MovementCategory) obj;
-        return active == that.active && name.equals(that.name) && Objects.equals(image, that.image) && id.equals(that.id);
+        return active == that.active && name.equals(that.name) && Objects.equals(image, that.image) && id.equals(that.id) && publicCategory == that.publicCategory;
     }
 
     @Override
