@@ -40,6 +40,9 @@ public class MovementCategory implements IMovementCategory {
         this(name, null, true, false);
     }
 
+    public static IMovementCategory createPublicCategory(String name, URI image){
+        return new MovementCategory(name, image, true, true);
+    }
 
     public MovementCategory(IMovementCategory transactionCategory) {
         if (transactionCategory == null)
@@ -119,7 +122,7 @@ public class MovementCategory implements IMovementCategory {
     /**
      * Changes the URI for accessing the Category image.
      *
-     * @param newImage
+     * @param newImage to update.
      */
     @Override
     public void updateImage(URI newImage) {
