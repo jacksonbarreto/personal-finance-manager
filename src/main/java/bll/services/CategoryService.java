@@ -41,4 +41,17 @@ public class CategoryService implements ICategoryService {
             return false;
         }
     }
+
+    @Override
+    public boolean updateCategory(IMovementCategory category) {
+        try {
+            IUser user = SessionService.getCurrentUser();
+            user.updateCategory(category);
+            this.userRepository.update(user);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }
