@@ -41,6 +41,17 @@ public class MovementCategoryRepository implements IMovementCategoryRepository {
         return allCategories;
     }
 
+    /**
+     * Returns all public movement categories.
+     *
+     * @return all public movement categories.
+     */
+    @Override
+    public Set<IMovementCategory> getOnlyPublic() {
+        Predicate<IMovementCategory> predicate = category -> category.isActive() && category.isPublic();
+        return categoryDAO.selectAll().stream().filter(predicate).collect(Collectors.toSet());
+    }
+
     @Override
     public Set<IMovementCategory> get(Predicate<IMovementCategory> predicate) {
         if (predicate == null)
