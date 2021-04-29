@@ -3,6 +3,7 @@ package bll.services;
 import bll.entities.IUser;
 import bll.exceptions.NullArgumentException;
 import bll.exceptions.SessionAlreadyHasUserException;
+import bll.exceptions.NonExistentSessionException;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -37,7 +38,10 @@ public class SessionService {
     }
 
     public static IUser getCurrentUser() {
-        return getInstance().currentUser == null ? null : getInstance().currentUser.clone();
+        if (getInstance().currentUser == null)
+            throw new NonExistentSessionException();
+
+        return getInstance().currentUser.clone();
     }
 
     public static void addUserInSession(IUser user) {
