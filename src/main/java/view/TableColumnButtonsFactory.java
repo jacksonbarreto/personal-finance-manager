@@ -38,4 +38,23 @@ public class TableColumnButtonsFactory<S> {
         column.setCellFactory(cellFactory);
         return column;
     }
+
+    public Callback<TableColumn<S, HBox>, TableCell<S, HBox>> getFactory() {
+        return new Callback<>() {
+            @Override
+            public TableCell<S, HBox> call(final TableColumn<S, HBox> sButtonTableColumn) {
+               TableCell<S, HBox> cell =  new TableCell<>() {
+                    @Override
+                    public void updateItem(HBox item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (empty)
+                            setGraphic(null);
+                        else
+                            setGraphic(buttonFactory.get());
+                    }
+                };
+                return cell;
+            }
+        };
+    }
 }
