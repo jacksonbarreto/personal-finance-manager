@@ -71,6 +71,7 @@ public class MovementCategory implements IMovementCategory {
         this.name = externalCopy.getName();
         this.active = externalCopy.isActive();
         this.image = externalCopy.getImage();
+        this.publicCategory = externalCopy.isPublic();
     }
 
     /**
