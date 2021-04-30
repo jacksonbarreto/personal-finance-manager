@@ -35,7 +35,7 @@ public class User implements IUser {
     @OneToMany(targetEntity = Payee.class, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "systemUser")
     private Set<IPayee> payees;
-    @OneToMany(targetEntity = MovementCategory.class, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(targetEntity = MovementCategory.class, cascade = CascadeType.ALL)
     @JoinColumn(name = "systemUser")
     private Set<IMovementCategory> categories;
 
