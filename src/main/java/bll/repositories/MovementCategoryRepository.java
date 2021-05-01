@@ -2,6 +2,7 @@ package bll.repositories;
 
 import bll.entities.IMovementCategory;
 import bll.exceptions.NullArgumentException;
+import bll.exceptions.UserIsNotAuthorizedForActionException;
 import bll.services.SessionService;
 import dal.infra.IDAO;
 import dal.infra.MovementCategoryDAO;
@@ -10,7 +11,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import static bll.enumerators.ERole.ADMIN;
 import static bll.services.PermissionService.permissionServiceDefault;
@@ -25,7 +25,7 @@ public class MovementCategoryRepository implements IMovementCategoryRepository {
     }
 
     private MovementCategoryRepository() {
-        this.categoryDAO = MovementCategoryDAO.getInstance();
+        this(MovementCategoryDAO.getInstance());
     }
 
     public static IMovementCategoryRepository getInstance() {
@@ -34,12 +34,6 @@ public class MovementCategoryRepository implements IMovementCategoryRepository {
 
     @Override
     public Set<IMovementCategory> getAll() {
-        /*
-        Predicate<IMovementCategory> predicate = category -> category.isActive() && category.isPublic();
-        allCategories.addAll(categoryDAO.selectAll().stream().filter(predicate).collect(Collectors.toSet()));
-        allCategories.addAll(SessionService.getCurrentUser().getCategory());
-
-         */
         return new HashSet<>(categoryDAO.select("select m from MovementCategory m where active = 1 and publicCategory = 1 "));
     }
 
@@ -50,8 +44,6 @@ public class MovementCategoryRepository implements IMovementCategoryRepository {
      */
     @Override
     public Set<IMovementCategory> getOnlyPublic() {
-        //Predicate<IMovementCategory> onlyPublic = category -> category.isActive() && category.isPublic();
-        //return categoryDAO.selectAll().stream().filter(onlyPublic).collect(Collectors.toSet());
         return new HashSet<>(categoryDAO.select("select m from MovementCategory m where active = 1 and publicCategory = 1 "));
     }
 
@@ -75,12 +67,11 @@ public class MovementCategoryRepository implements IMovementCategoryRepository {
     public void add(IMovementCategory element) {
         if (element == null)
             throw new NullArgumentException();
-        Predicate<IMovementCategory> predicate = IMovementCategory::isPublic;
-        Set<IMovementCategory> publicCategory = get(predicate);
+        Set<IMovementCategory> publicCategory = getOnlyPublic();
         if (permissionServiceDefault().hasRole(SessionService.getCurrentUser(), ADMIN) && element.isPublic()) {
             if (!publicCategory.contains(element))
                 categoryDAO.create(element);
-        }
+        } else throw new UserIsNotAuthorizedForActionException();
     }
 
     @Override
@@ -89,6 +80,8 @@ public class MovementCategoryRepository implements IMovementCategoryRepository {
             throw new NullArgumentException();
         if (permissionServiceDefault().hasRole(SessionService.getCurrentUser(), ADMIN) && element.isPublic())
             categoryDAO.update(element);
+        else
+            throw new UserIsNotAuthorizedForActionException();
     }
 
     @Override
@@ -98,6 +91,7 @@ public class MovementCategoryRepository implements IMovementCategoryRepository {
         if (permissionServiceDefault().hasRole(SessionService.getCurrentUser(), ADMIN) && element.isPublic()) {
             element.inactivate();
             categoryDAO.update(element);
-        }
+        } else
+            throw new UserIsNotAuthorizedForActionException();
     }
 }
