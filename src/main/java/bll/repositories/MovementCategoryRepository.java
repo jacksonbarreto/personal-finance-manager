@@ -60,6 +60,8 @@ public class MovementCategoryRepository implements IMovementCategoryRepository {
 
     @Override
     public IMovementCategory get(UUID id) {
+        if (id == null)
+            throw new NullArgumentException();
         return categoryDAO.select(id);
     }
 
