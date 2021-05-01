@@ -1,6 +1,7 @@
 package bll.repositories;
 
 import bll.entities.IMovementCategory;
+import bll.exceptions.ExistingCategoryException;
 import bll.exceptions.NullArgumentException;
 import bll.exceptions.UserIsNotAuthorizedForActionException;
 import bll.services.SessionService;
@@ -71,8 +72,11 @@ public class MovementCategoryRepository implements IMovementCategoryRepository {
             throw new NullArgumentException();
         Set<IMovementCategory> publicCategory = getOnlyPublic();
         if (permissionServiceDefault().hasRole(SessionService.getCurrentUser(), ADMIN) && element.isPublic()) {
-            if (!publicCategory.contains(element))
+            if (!publicCategory.contains(element) &&
+                    publicCategory.stream().noneMatch(f -> f.getName().equalsIgnoreCase(element.getName())))
                 categoryDAO.create(element);
+            else
+                throw new ExistingCategoryException();
         } else throw new UserIsNotAuthorizedForActionException();
     }
 
