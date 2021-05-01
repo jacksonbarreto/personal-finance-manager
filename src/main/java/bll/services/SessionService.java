@@ -50,7 +50,7 @@ public class SessionService {
         if (getInstance().currentUser == null)
             throw new NonExistentSessionException();
         getInstance().keepsSessionActive();
-        return getInstance().currentUser.clone();
+        return getInstance().currentUser;
     }
 
     public static void addUserInSession(IUser user) {
