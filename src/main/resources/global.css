@@ -33,8 +33,18 @@
     -fx-text-fill: #f7f1e3;
 }
 
+.close-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0px;
+    -fx-padding: 3px;
+}
+
 .close-button:hover {
-    -fx-background-color: red;
+    -fx-background-color: #e84118;
+}
+
+.close-button:armed {
+    -fx-background-color: #c23616;
 }
 
 .close-button-dashboard:hover {
@@ -44,8 +54,12 @@
 }
 
 .minimize-button:hover {
-    -fx-background-color: #f7f1e3;
+    -fx-background-color: #dfe4ea;
     -fx-icon-color: #474787;
+}
+
+.minimize-button:armed {
+    -fx-background-color: #ced6e0;
 }
 
 .minimize-button-dashboard:hover {
@@ -57,4 +71,52 @@
 .title-bar {
     -fx-background-color: #276955;
     -fx-border-color: transparent transparent #41A58D transparent;
+    -fx-padding: 0px;
+}
+
+.backdrop {
+    -fx-background-color: rgba(61, 61, 61, 0.5);
+}
+
+.modal {
+    -fx-background-color: #fff;
+    -fx-background-radius: 5px;
+}
+
+.default-button {
+    -fx-background-color: #276955;
+    -fx-text-fill: #f7f1e3;
+    -fx-background-radius: 0px;
+}
+
+.default-button:hover {
+    -fx-background-color: #214F41;
+}
+
+.default-button:armed {
+    -fx-background-color: #16352C;
+}
+
+.danger-button {
+    -fx-background-color: #e84118;
+    -fx-text-fill: #2f3640;
+    -fx-background-radius: 0px;
+}
+
+.danger-button:hover {
+    -fx-text-fill: #f7f1e3;
+    -fx-background-color: #c23616;
+}
+
+.danger-button:armed {
+    -fx-text-fill: #f7f1e3;
+    -fx-background-color: #77220E;
+}
+
+.success-message{
+    -fx-text-fill: #276955;
+}
+
+.error-message{
+    -fx-text-fill: #c23616;
 }

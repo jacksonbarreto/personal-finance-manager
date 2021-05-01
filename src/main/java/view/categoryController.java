@@ -34,7 +34,7 @@ public class categoryController implements Initializable {
     @FXML
     private AnchorPane interactiveModal;
     @FXML
-    private AnchorPane successModal;
+    private AnchorPane resultModel;
     @FXML
     private AnchorPane deleteModal;
     @FXML
@@ -52,7 +52,7 @@ public class categoryController implements Initializable {
     @FXML
     private Button cancelButton;
     @FXML
-    private Label successMessage;
+    private Label resultMessage;
     @FXML
     private Label screenTitle;
     @FXML
@@ -107,7 +107,7 @@ public class categoryController implements Initializable {
     private void initializesScreens() {
         this.modal.setVisible(false);
         this.interactiveModal.setVisible(false);
-        this.successModal.setVisible(false);
+        this.resultModel.setVisible(false);
         this.deleteModal.setVisible(false);
     }
 
@@ -164,8 +164,8 @@ public class categoryController implements Initializable {
         closeModal();
     }
 
-    public void closeSuccessModal() {
-        this.successModal.setVisible(false);
+    public void closeResultModal() {
+        this.resultModel.setVisible(false);
         closeModal();
     }
 
@@ -174,10 +174,11 @@ public class categoryController implements Initializable {
         closeModal();
     }
 
-    private void getSuccessModal(String message) {
-        this.successMessage.setText(message);
+    private void getResultModal(String message, String classCSS) {
+        this.resultMessage.setText(message);
+        this.resultMessage.getStyleClass().add(classCSS);
         openModal();
-        this.successModal.setVisible(true);
+        this.resultModel.setVisible(true);
     }
 
     private void getDeleteModal() {
@@ -197,10 +198,10 @@ public class categoryController implements Initializable {
                 MovementCategoryRepository.getInstance().update(currentCategory);
                 currentCategory = null;
                 interactiveModal.setVisible(false);
-                getSuccessModal(rb.getString("updated.category"));
+                getResultModal(rb.getString("updated.category"), "success-message");
                 refreshItems();
             } catch (URISyntaxException e) {
-                e.printStackTrace();
+                getResultModal(e.getMessage(), "error-message");
             }
         });
         this.interactiveModal.setVisible(true);
@@ -218,10 +219,10 @@ public class categoryController implements Initializable {
                 IMovementCategory newCategory = createPublicCategory(this.categoryName.getText(), new URI(this.URI.getText()));
                 MovementCategoryRepository.getInstance().add(newCategory);
                 this.interactiveModal.setVisible(false);
-                getSuccessModal(rb.getString("created.category"));
+                getResultModal(rb.getString("created.category"), "success-message");
                 refreshItems();
             } catch (URISyntaxException e) {
-                e.printStackTrace();
+                getResultModal(e.getMessage(), "error-message");
             }
         });
         this.interactiveModal.setVisible(true);
@@ -231,10 +232,13 @@ public class categoryController implements Initializable {
 
     public void deleteCategory() {
         ResourceBundle rb = ResourceBundle.getBundle("lang/messages");
-        MovementCategoryRepository.getInstance().remove(this.currentCategory);
-        refreshItems();
-        closeDeleteModal();
-        getSuccessModal(rb.getString("deleted.category"));
-        this.currentCategory = null;
+        try {
+            MovementCategoryRepository.getInstance().remove(this.currentCategory);
+            refreshItems();
+            closeDeleteModal();
+            getResultModal(rb.getString("deleted.category"), "success-message");
+        } catch (Exception e) {
+            getResultModal(e.getMessage(), "error-message");
+        }
     }
 }
