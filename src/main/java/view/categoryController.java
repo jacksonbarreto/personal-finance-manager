@@ -15,7 +15,6 @@ import javafx.scene.layout.StackPane;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.ResourceBundle;
@@ -176,6 +175,7 @@ public class categoryController implements Initializable {
 
     private void getResultModal(String message, String classCSS) {
         this.resultMessage.setText(message);
+        this.resultMessage.getStyleClass().clear();
         this.resultMessage.getStyleClass().add(classCSS);
         openModal();
         this.resultModel.setVisible(true);
@@ -193,14 +193,14 @@ public class categoryController implements Initializable {
         this.URI.setText(currentCategory.getImage().getPath());
         this.saveButton.setOnAction((ActionEvent event) -> {
             try {
-                currentCategory.updateImage(new URI(URI.getText()));
-                currentCategory.updateName(categoryName.getText());
+                currentCategory.updateImage(new URI(URI.getText().trim()));
+                currentCategory.updateName(categoryName.getText().trim());
                 MovementCategoryRepository.getInstance().update(currentCategory);
-                currentCategory = null;
                 interactiveModal.setVisible(false);
                 getResultModal(rb.getString("updated.category"), "success-message");
                 refreshItems();
-            } catch (URISyntaxException e) {
+            } catch (Exception e) {
+                interactiveModal.setVisible(false);
                 getResultModal(e.getMessage(), "error-message");
             }
         });
@@ -216,12 +216,13 @@ public class categoryController implements Initializable {
         this.URI.setText("");
         this.saveButton.setOnAction((ActionEvent event) -> {
             try {
-                IMovementCategory newCategory = createPublicCategory(this.categoryName.getText(), new URI(this.URI.getText()));
+                IMovementCategory newCategory = createPublicCategory(this.categoryName.getText().trim(), new URI(this.URI.getText().trim()));
                 MovementCategoryRepository.getInstance().add(newCategory);
                 this.interactiveModal.setVisible(false);
                 getResultModal(rb.getString("created.category"), "success-message");
                 refreshItems();
-            } catch (URISyntaxException e) {
+            } catch (Exception e) {
+                this.interactiveModal.setVisible(false);
                 getResultModal(e.getMessage(), "error-message");
             }
         });
