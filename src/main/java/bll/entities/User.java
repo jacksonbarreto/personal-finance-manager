@@ -4,6 +4,8 @@ import bll.enumerators.ERole;
 import bll.enumerators.EUserState;
 import bll.exceptions.*;
 import bll.valueObjects.IEmail;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -21,12 +23,21 @@ public class User implements IUser {
     @OneToOne(targetEntity = Credential.class, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(nullable = false)
     private ICredential credential;
-    @ElementCollection(fetch = FetchType.EAGER)
-    @Column(nullable = false)
+
+    @ElementCollection(targetClass = EUserState.class, fetch = FetchType.EAGER)
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @CollectionTable(name = "systemUserState", joinColumns = @JoinColumn(name = "userState", nullable = false))
+    @Column(name = "systemUser", nullable = false)
+    @OrderColumn
     private List<EUserState> userStates;
-    @ElementCollection(fetch = FetchType.LAZY)
-    @Column(nullable = false)
+
+    @ElementCollection(targetClass = ERole.class, fetch = FetchType.EAGER)
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @CollectionTable(name = "systemUserRole", joinColumns = @JoinColumn(name = "role", nullable = false))
+    @Column(name = "systemUser", nullable = false)
+    @OrderColumn
     private List<ERole> roles;
+
     @Column(nullable = false, unique = true)
     private IEmail email;
     @OneToMany(targetEntity = Wallet.class, cascade = CascadeType.ALL, orphanRemoval = true)
