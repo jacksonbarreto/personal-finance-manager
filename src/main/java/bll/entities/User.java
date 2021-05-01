@@ -16,10 +16,13 @@ import java.util.*;
 public class User implements IUser {
     @Id
     private UUID ID;
+
     @Column(nullable = false, length = MAXIMUM_NAME_SIZE)
     private String name;
+
     @Column(nullable = false)
     private LocalDate registrationDate;
+
     @OneToOne(targetEntity = Credential.class, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(nullable = false)
     private ICredential credential;
@@ -40,12 +43,15 @@ public class User implements IUser {
 
     @Column(nullable = false, unique = true)
     private IEmail email;
+
     @OneToMany(targetEntity = Wallet.class, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "systemUser")
     private Set<IWallet> wallets;
+
     @OneToMany(targetEntity = Payee.class, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "systemUser")
     private Set<IPayee> payees;
+
     @OneToMany(targetEntity = MovementCategory.class, cascade = CascadeType.ALL)
     @JoinColumn(name = "systemUser")
     private Set<IMovementCategory> categories;
@@ -174,7 +180,7 @@ public class User implements IUser {
      */
     @Override
     public List<EUserState> getUserStates() {
-        return Collections.unmodifiableList(this.userStates);
+        return new ArrayList<>(this.userStates);
     }
 
     /**
@@ -184,7 +190,7 @@ public class User implements IUser {
      */
     @Override
     public List<ERole> getRoles() {
-        return Collections.unmodifiableList(this.roles);
+        return new ArrayList<>(this.roles);
     }
 
     /**
@@ -518,10 +524,10 @@ public class User implements IUser {
         return foundCategory;
     }
 
-    private IWallet fetchWallet(IWallet wallet){
+    private IWallet fetchWallet(IWallet wallet) {
         IWallet foundWallet = null;
-        for(IWallet w : this.wallets)
-            if (w.equals(wallet)){
+        for (IWallet w : this.wallets)
+            if (w.equals(wallet)) {
                 foundWallet = w;
                 break;
             }
