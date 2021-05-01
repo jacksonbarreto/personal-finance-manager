@@ -9,13 +9,14 @@ import java.time.Duration;
 import java.time.Instant;
 
 public class SessionService {
-    private static final int INACTIVITY_ALLOWED_IN_MINUTES = 3;
+    private static final int INACTIVITY_ALLOWED_IN_MINUTES = 1;
     private static final int SECONDS = 60;
     private static SessionService INSTANCE;
     private Instant lastInteraction;
     private IUser currentUser;
 
     private SessionService() {
+        this.lastInteraction = Instant.now();
     }
 
     private static SessionService getInstance() {
@@ -31,6 +32,10 @@ public class SessionService {
 
     private void keepsSessionActive() {
         this.lastInteraction = Instant.now();
+    }
+
+    public static void killSession() {
+        INSTANCE = null;
     }
 
     public static boolean isValid() {
@@ -60,6 +65,4 @@ public class SessionService {
             throw new SessionAlreadyHasUserException();
         getInstance().currentUser = user.clone();
     }
-
-
 }
