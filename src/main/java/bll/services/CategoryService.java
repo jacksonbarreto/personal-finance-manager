@@ -2,6 +2,8 @@ package bll.services;
 
 import bll.entities.IMovementCategory;
 import bll.entities.IUser;
+import bll.enumerators.ERole;
+import bll.exceptions.UserIsNotAuthorizedForActionException;
 import bll.repositories.IUserRepository;
 import bll.repositories.UserRepository;
 
@@ -16,10 +18,14 @@ public class CategoryService implements ICategoryService {
         return new CategoryService(UserRepository.getInstance());
     }
 
+
+
     @Override
     public boolean registerCategory(IMovementCategory category) {
-        try {
             IUser user = SessionService.getCurrentUser();
+        if (category.isPublic() && !PermissionService.permissionServiceDefault().hasRole(user, ERole.ADMIN))
+            throw new UserIsNotAuthorizedForActionException();
+        try {
             user.addCategory(category);
             this.userRepository.update(user);
             return true;
@@ -31,8 +37,10 @@ public class CategoryService implements ICategoryService {
 
     @Override
     public boolean removeCategory(IMovementCategory category) {
-        try {
             IUser user = SessionService.getCurrentUser();
+        if (category.isPublic() && !PermissionService.permissionServiceDefault().hasRole(user, ERole.ADMIN))
+            throw new UserIsNotAuthorizedForActionException();
+        try {
             user.removeCategory(category);
             this.userRepository.update(user);
             return true;
@@ -44,8 +52,10 @@ public class CategoryService implements ICategoryService {
 
     @Override
     public boolean updateCategory(IMovementCategory category) {
-        try {
             IUser user = SessionService.getCurrentUser();
+        if (category.isPublic() && !PermissionService.permissionServiceDefault().hasRole(user, ERole.ADMIN))
+            throw new UserIsNotAuthorizedForActionException();
+        try {
             user.updateCategory(category);
             this.userRepository.update(user);
             return true;
