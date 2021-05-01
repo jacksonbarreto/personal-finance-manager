@@ -3,18 +3,26 @@ package dal.infra;
 import bll.entities.IUser;
 import bll.entities.User;
 
+import javax.persistence.TypedQuery;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static dal.infra.EntityManagerSingleton.getEntityManager;
 import static dal.infra.IDAO.executeInsideTransaction;
-import static dal.infra.IDAO.getEntityManager;
 
 public class UserDAO implements IDAO<IUser> {
 
+    public List<IUser> selectAll() {
+        return new ArrayList<>(getEntityManager().createQuery("select t from User t", User.class).getResultList());
+    }
 
     @Override
-    public List<IUser> selectAll() {
-        return getEntityManager().createQuery("select t from " + User.class.getSimpleName() + " t", IUser.class).getResultList();
+    public List<IUser> select(String query) {
+        List<IUser> users;
+        TypedQuery<IUser> typedQuery = getEntityManager().createQuery(query, IUser.class);
+        users = typedQuery.getResultList();
+        return users;
     }
 
     @Override
@@ -34,7 +42,6 @@ public class UserDAO implements IDAO<IUser> {
 
     @Override
     public void delete(IUser element) {
-
         executeInsideTransaction(entityManager -> entityManager.remove(element));
     }
 
@@ -44,4 +51,5 @@ public class UserDAO implements IDAO<IUser> {
 
     private UserDAO() {
     }
+
 }

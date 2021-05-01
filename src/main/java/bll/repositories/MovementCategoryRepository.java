@@ -34,11 +34,13 @@ public class MovementCategoryRepository implements IMovementCategoryRepository {
 
     @Override
     public Set<IMovementCategory> getAll() {
-        Set<IMovementCategory> allCategories = new HashSet<>();
+        /*
         Predicate<IMovementCategory> predicate = category -> category.isActive() && category.isPublic();
         allCategories.addAll(categoryDAO.selectAll().stream().filter(predicate).collect(Collectors.toSet()));
         allCategories.addAll(SessionService.getCurrentUser().getCategory());
-        return allCategories;
+
+         */
+        return new HashSet<>(categoryDAO.select("select m from MovementCategory m where active = 1 and publicCategory = 1 "));
     }
 
     /**
@@ -48,8 +50,9 @@ public class MovementCategoryRepository implements IMovementCategoryRepository {
      */
     @Override
     public Set<IMovementCategory> getOnlyPublic() {
-        Predicate<IMovementCategory> predicate = category -> category.isActive() && category.isPublic();
-        return categoryDAO.selectAll().stream().filter(predicate).collect(Collectors.toSet());
+        //Predicate<IMovementCategory> onlyPublic = category -> category.isActive() && category.isPublic();
+        //return categoryDAO.selectAll().stream().filter(onlyPublic).collect(Collectors.toSet());
+        return new HashSet<>(categoryDAO.select("select m from MovementCategory m where active = 1 and publicCategory = 1 "));
     }
 
     @Override

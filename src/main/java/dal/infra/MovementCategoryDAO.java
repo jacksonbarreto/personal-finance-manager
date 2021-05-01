@@ -3,17 +3,22 @@ package dal.infra;
 import bll.entities.IMovementCategory;
 import bll.entities.MovementCategory;
 
+import javax.persistence.TypedQuery;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static dal.infra.IDAO.*;
-import static dal.infra.IDAO.getEntityManager;
+import static dal.infra.EntityManagerSingleton.getEntityManager;
+import static dal.infra.IDAO.executeInsideTransaction;
 
 public class MovementCategoryDAO implements IDAO<IMovementCategory> {
 
     @Override
-    public List<IMovementCategory> selectAll() {
-        return getEntityManager().createQuery("select t from " + MovementCategory.class.getSimpleName() + " t", IMovementCategory.class).getResultList();
+    public List<IMovementCategory> select(String query) {
+        List<IMovementCategory> movementCategories;
+        TypedQuery<MovementCategory> typedQuery = getEntityManager().createQuery(query, MovementCategory.class);
+        movementCategories = new ArrayList<>(typedQuery.getResultList());
+        return movementCategories;
     }
 
     @Override

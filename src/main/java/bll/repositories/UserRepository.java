@@ -32,14 +32,14 @@ public class UserRepository implements IUserRepository {
     public Set<IUser> get(Predicate<IUser> predicate) {
         if (predicate == null)
             throw new NullArgumentException();
-        return userDAO.selectAll().stream().filter(predicate).collect(Collectors.toSet());
+        return userDAO.select("select t from User t").stream().filter(predicate).collect(Collectors.toSet());
     }
 
     @Override
     public IUser getFirst(Predicate<IUser> predicate) {
         if (predicate == null)
             throw new NullArgumentException();
-        return userDAO.selectAll().stream().filter(predicate).findFirst().orElse(null);
+        return userDAO.select("select t from User t").stream().filter(predicate).findFirst().orElse(null);
     }
 
     @Override
