@@ -78,6 +78,8 @@ public class User implements IUser {
         this.wallets = new HashSet<>();
         this.payees = new HashSet<>();
         this.categories = new HashSet<>();
+        this.credential.addAccessKey(this.email.getEmail());
+        this.credential.addAccessKey(this.name);
     }
 
     private User(IUser user) {
@@ -126,7 +128,9 @@ public class User implements IUser {
             throw new NullArgumentException();
         if (INCORRECT_NAME_SIZE.test(newName.trim()))
             throw new InvalidNameSizeException();
+        this.credential.removeAccessKey(this.name);
         this.name = newName.trim();
+        this.credential.addAccessKey(this.name);
     }
 
     /**
@@ -150,7 +154,9 @@ public class User implements IUser {
         if (newEmail == null)
             throw new NullArgumentException();
 
+        this.credential.removeAccessKey(this.email.getEmail());
         this.email = newEmail;
+        this.credential.addAccessKey(this.email.getEmail());
     }
 
     /**
