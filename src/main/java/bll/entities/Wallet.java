@@ -83,17 +83,17 @@ public class Wallet implements IWallet {
             this.updateName(externalCopy.getName());
             this.description = externalCopy.getDescription();
             this.currency = externalCopy.getCurrency();
-            for(IFormOfPayment f : this.formOfPayments){
-                for(IFormOfPayment fExternal : externalCopy.getFormOfPayment()){
-                    if (fExternal.equals(f)){
+            for (IFormOfPayment f : this.formOfPayments) {
+                for (IFormOfPayment fExternal : externalCopy.getFormOfPayment()) {
+                    if (fExternal.equals(f)) {
                         f.autoUpdate(fExternal);
                         break;
                     }
                 }
             }
-            for(IFormOfPayment f : externalCopy.getFormOfPayment()){
-                if (!this.formOfPayments.contains(f)){
-                   this.formOfPayments.add(f.clone());
+            for (IFormOfPayment f : externalCopy.getFormOfPayment()) {
+                if (!this.formOfPayments.contains(f)) {
+                    this.formOfPayments.add(f.clone());
                 }
             }
             this.formOfPayments.retainAll(externalCopy.getFormOfPayment());
@@ -101,9 +101,9 @@ public class Wallet implements IWallet {
             for (IMovement m : externalCopy.getMovements())
                 this.movements.add(m.clone());
 
-            for (IMovement m : this.movements){
-                for (IMovement mExternal : externalCopy.getMovements()){
-                    if (m.equals(mExternal)){
+            for (IMovement m : this.movements) {
+                for (IMovement mExternal : externalCopy.getMovements()) {
+                    if (m.equals(mExternal)) {
                         m.autoUpdate(mExternal);
                         break;
                     }
@@ -376,12 +376,16 @@ public class Wallet implements IWallet {
      * Adds a new payment method to the wallet.
      *
      * @param formOfPayment new payment method to the wallet.
-     * @throws NullArgumentException if the argument is null.
+     * @throws NullArgumentException          if the argument is null.
+     * @throws ExistingFormOfPaymentException if the payment method already existing.
      */
     @Override
     public void addFormOfPayment(IFormOfPayment formOfPayment) {
         if (formOfPayment == null)
             throw new NullArgumentException();
+        if (this.formOfPayments.contains(formOfPayment) ||
+                this.formOfPayments.stream().anyMatch(f -> f.getName().equalsIgnoreCase(formOfPayment.getName())))
+            throw new ExistingFormOfPaymentException();
         this.formOfPayments.add(formOfPayment.clone());
     }
 

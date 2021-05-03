@@ -33,6 +33,7 @@ public interface IWallet extends Serializable, Comparable<IWallet>, Cloneable {
      * @throws NullArgumentException    if the argument is null.
      */
     void autoUpdate(IWallet externalCopy);
+
     /**
      * Returns the unique identifier of the wallet.
      *
@@ -165,7 +166,8 @@ public interface IWallet extends Serializable, Comparable<IWallet>, Cloneable {
      * Adds a new payment method to the wallet.
      *
      * @param formOfPayment new payment method to the wallet.
-     * @throws NullArgumentException if the argument is null.
+     * @throws NullArgumentException          if the argument is null.
+     * @throws ExistingFormOfPaymentException if the payment method already existing.
      */
     void addFormOfPayment(IFormOfPayment formOfPayment);
 

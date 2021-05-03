@@ -135,6 +135,12 @@ public class WalletTest {
     }
 
     @Test
+    public void shouldThrowExceptionByFormOfPaymentExisting() {
+        assertThrows(ExistingFormOfPaymentException.class, () -> obj1.addFormOfPayment(formOfPayment1));
+        assertThrows(ExistingFormOfPaymentException.class, () -> obj1.addFormOfPayment(new FormOfPayment("MB Way")));
+    }
+
+    @Test
     public void shouldThrowExceptionByPayeeFormatNull() {
         assertThrows(NullArgumentException.class, () -> new Wallet("wallet", "Description",
                 Currency.getInstance(Locale.getDefault()), Collections.singleton(formOfPayment1), null));
