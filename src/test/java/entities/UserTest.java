@@ -130,6 +130,7 @@ public class UserTest {
         IEmail email2 = new Email("turin@imb.com");
         obj1.updateEmail(email2);
         assertTrue(obj1.getCredential().getAccessKeys().contains(email2.getEmail()));
+        assertFalse(obj1.getCredential().getAccessKeys().contains(email1.getEmail()));
     }
 
     @Test
@@ -141,6 +142,7 @@ public class UserTest {
     public void shouldUpdateNameInAccessKeyWhenUpdateName() {
         obj1.updateName("new name");
         assertTrue(obj1.getCredential().getAccessKeys().contains("new name"));
+        assertFalse(obj1.getCredential().getAccessKeys().contains(name));
     }
 
     @Test
