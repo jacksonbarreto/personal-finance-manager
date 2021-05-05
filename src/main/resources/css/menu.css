@@ -1,0 +1,25 @@
+.menu {
+    -fx-background-color: #276955;
+    -fx-padding: 20px 0px 0px 0px;
+}
+
+.menu-button {
+    -fx-background-color: #276955;
+    -fx-text-fill: #f7f1e3;
+    -fx-background-radius: 0px;
+}
+
+.menu-button:hover {
+    -fx-background-color: #214F41;
+    -fx-border-color: transparent transparent #f7f1e3 transparent;
+}
+
+.menu-button:armed {
+    -fx-background-color: #16352C;
+    -fx-border-color: transparent transparent #aaa69d transparent;
+}
+
+.menu-button-selected {
+    -fx-background-color: #16352C;
+    -fx-border-color: transparent transparent #aaa69d transparent;
+}
