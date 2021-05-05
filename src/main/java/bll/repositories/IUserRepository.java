@@ -3,6 +3,7 @@ package bll.repositories;
 import bll.entities.IUser;
 import bll.exceptions.NullArgumentException;
 
+import java.util.Set;
 import java.util.function.Predicate;
 
 public interface IUserRepository extends IRepository<IUser> {
@@ -14,4 +15,7 @@ public interface IUserRepository extends IRepository<IUser> {
      * @throws NullArgumentException if any of the parameters are null.
      */
     IUser getFirst(Predicate<IUser> predicate);
+
+    Set<IUser> getAll();
+
 }

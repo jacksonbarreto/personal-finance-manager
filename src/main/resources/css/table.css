@@ -108,3 +108,39 @@
     -fx-background-color: #276955;
 
 }
+
+/*  Pagination  */
+
+.pagination  >  .pagination-control  > .left-arrow, .right-arrow{
+    -fx-background-color: #f7f1e3;
+}
+
+/* Actual button */
+.pagination > .pagination-control > .control-box > .number-button,
+.pagination > .pagination-control > .control-box > .bullet-button,
+.pagination > .pagination-control > .control-box > .left-arrow-button,
+.pagination > .pagination-control > .control-box > .right-arrow-button {
+    -fx-background-insets: 0, 1;
+    -fx-background-color: #276955;
+    -fx-min-width: 30;
+    -fx-min-height: 30;
+    -fx-text-fill: #f7f1e3;
+    -fx-background-radius: 0;
+}
+
+/* Colors on hover */
+.pagination > .pagination-control > .control-box > .number-button:hover,
+.pagination > .pagination-control > .control-box > .bullet-button:hover,
+.pagination > .pagination-control > .control-box > .left-arrow-button:hover,
+.pagination > .pagination-control > .control-box > .right-arrow-button:hover {
+    -fx-background-insets: 0;
+    -fx-background-color: #214F41;
+    -fx-text-fill: #f7f1e3;
+}
+/* Selected toggle color */
+.pagination > .pagination-control > .control-box > .number-button:selected,
+.pagination > .pagination-control > .control-box > .bullet-button:selected{
+     -fx-background-insets: 0;
+    -fx-background-color: #16352C;
+    -fx-text-fill: #f7f1e3;
+}

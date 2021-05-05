@@ -4,7 +4,9 @@ import bll.entities.IUser;
 import bll.exceptions.NullArgumentException;
 import dal.infra.IDAO;
 import dal.infra.UserDAO;
+import org.hibernate.event.internal.DefaultResolveNaturalIdEventListener;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
@@ -33,6 +35,12 @@ public class UserRepository implements IUserRepository {
         if (predicate == null)
             throw new NullArgumentException();
         return userDAO.select("select t from User t").stream().filter(predicate).collect(Collectors.toSet());
+    }
+
+
+    @Override
+    public Set<IUser> getAll() {
+        return new HashSet<>(userDAO.select("select t from User t"));
     }
 
     @Override
