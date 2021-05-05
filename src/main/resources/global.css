@@ -16,6 +16,7 @@
 
 .default-field-error {
     -fx-background-color: rgba(105, 39, 59, 0.5);
+    -fx-background-radius: 3 3 0 0;
 }
 
 .default-button {
@@ -119,4 +120,10 @@
 
 .error-message{
     -fx-text-fill: #c23616;
+}
+
+.search-button{
+    -fx-background-radius: 0;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent #41A58D transparent;
 }
