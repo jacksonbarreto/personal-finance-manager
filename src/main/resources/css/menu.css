@@ -15,7 +15,7 @@
 }
 
 .menu-button:armed {
-    -fx-background-color: #16352C;
+    -fx-background-color: #214339;
     -fx-border-color: transparent transparent #aaa69d transparent;
 }
 

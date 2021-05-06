@@ -111,7 +111,7 @@
 
 /*  Pagination  */
 
-.pagination  >  .pagination-control  > .left-arrow, .right-arrow{
+.pagination > .pagination-control > .left-arrow, .right-arrow {
     -fx-background-color: #f7f1e3;
 }
 
@@ -137,10 +137,11 @@
     -fx-background-color: #214F41;
     -fx-text-fill: #f7f1e3;
 }
+
 /* Selected toggle color */
 .pagination > .pagination-control > .control-box > .number-button:selected,
-.pagination > .pagination-control > .control-box > .bullet-button:selected{
-     -fx-background-insets: 0;
+.pagination > .pagination-control > .control-box > .bullet-button:selected {
+    -fx-background-insets: 0;
     -fx-background-color: #16352C;
     -fx-text-fill: #f7f1e3;
 }

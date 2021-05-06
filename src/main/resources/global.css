@@ -114,16 +114,58 @@
     -fx-background-color: #77220E;
 }
 
-.success-message{
+.success-message {
     -fx-text-fill: #276955;
 }
 
-.error-message{
+.error-message {
     -fx-text-fill: #c23616;
 }
 
-.search-button{
+.search-button {
     -fx-background-radius: 0;
     -fx-background-color: transparent;
     -fx-border-color: transparent transparent #41A58D transparent;
+}
+
+.check-box {
+    /* default properties */
+    selected-box-color: #16352C;
+    box-color: #276955;
+    mark-color: #f7f1e3;
+
+}
+
+.check-box > .box {
+    /* background color of unselected checkbox */
+    -fx-background-color: #276955;
+    -fx-border-color: #aaa69d;
+    -fx-background-radius: 0;
+    -fx-background-insets: 0;
+}
+
+.check-box:selected > .box {
+    /* background color for selected checkbox */
+    -fx-background-color: selected-box-color;
+    -fx-border-color: #aaa69d;
+
+}
+
+.check-box:hover > .box {
+    /* background color for selected checkbox */
+    -fx-background-color: #214F41;
+    -fx-border-color: #f7f1e3;
+}
+
+.check-box:pressed > .box {
+    /* background color for selected checkbox */
+    -fx-background-color: #214339;
+    -fx-border-color: #f7f1e3;
+}
+
+
+.check-box:selected > .box > .mark,
+.check-box:indeterminate > .box > .mark {
+    /* modify mark color */
+    -fx-background-color: mark-color;
 }

@@ -68,14 +68,14 @@
             </AnchorPane>
             <AnchorPane fx:id="editModal" prefHeight="200.0" prefWidth="200.0">
                <children>
-                  <AnchorPane prefHeight="200.0" prefWidth="200.0" styleClass="modal" stylesheets="@../global.css" AnchorPane.leftAnchor="120.0" AnchorPane.rightAnchor="120.0" AnchorPane.topAnchor="120.0">
+                  <AnchorPane prefHeight="216.0" prefWidth="440.0" styleClass="modal" stylesheets="@../global.css" AnchorPane.leftAnchor="180.0" AnchorPane.rightAnchor="180.0" AnchorPane.topAnchor="120.0">
                      <children>
                         <Label fx:id="modalEditTitle" text="Editar Permissões" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="20.0">
                            <font>
                               <Font name="System Bold" size="14.0" />
                            </font>
                         </Label>
-                        <VBox maxHeight="1.7976931348623157E308" prefHeight="114.0" prefWidth="100.0" spacing="5.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="60.0">
+                        <VBox maxHeight="1.7976931348623157E308" prefHeight="114.0" prefWidth="100.0" spacing="15.0" stylesheets="@../global.css" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="60.0">
                            <children>
                               <CheckBox fx:id="adminChekBox" mnemonicParsing="false" text="Administrador" />
                               <CheckBox fx:id="premiumChekBox" mnemonicParsing="false" text="Premium" />
