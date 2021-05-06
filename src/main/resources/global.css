@@ -169,3 +169,15 @@
     /* modify mark color */
     -fx-background-color: mark-color;
 }
+
+.box-counter{
+    color-derive: derive(#276955, -20%);
+    -fx-effect: dropshadow(three-pass-box, color-derive, 10, 0, 4, 4);
+    -fx-background-color: derive(#276955, -20%);
+    -fx-background-insets: 12;
+}
+
+.box-counter > .label{
+    -fx-text-fill: #f7f1e3;
+
+}
