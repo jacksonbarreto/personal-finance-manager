@@ -40,7 +40,7 @@
                   </Pane>
                </children>
             </HBox>
-            <Label alignment="CENTER" contentDisplay="CENTER" text="Painel Administrativo" textFill="#474787">
+            <Label alignment="CENTER" contentDisplay="CENTER" text="Painel Administrativo">
                <font>
                   <Font name="System Bold" size="24.0" />
                </font>
@@ -48,7 +48,7 @@
                   <Insets bottom="80.0" />
                </VBox.margin>
             </Label>
-            <VBox maxWidth="300.0" prefHeight="54.0">
+            <VBox maxWidth="300.0">
                <children>
                   <Label text="Chave de acesso">
                      <VBox.margin>
@@ -88,7 +88,7 @@
                               <Font size="22.0" />
                            </font>
                         </FontIcon>
-                        <PasswordField fx:id="password" maxWidth="-Infinity" onKeyPressed="#passwordPressed" prefWidth="250.0" styleClass="default-field">
+                        <PasswordField fx:id="password" maxWidth="-Infinity" onKeyPressed="#passwordPressed" prefHeight="26.0" prefWidth="250.0" styleClass="default-field">
                            <HBox.margin>
                               <Insets left="5.0" />
                            </HBox.margin>
@@ -106,10 +106,13 @@
                </VBox.margin>
             </Label>
             <Button mnemonicParsing="false" onAction="#login" prefHeight="30.0" prefWidth="100.0" styleClass="default-button" stylesheets="@../global.css" text="Entrar" />
-            <Label fx:id="message" alignment="TOP_CENTER" contentDisplay="CENTER" maxWidth="-Infinity" prefHeight="51.0" prefWidth="250.0" text="Label" textAlignment="CENTER" textFill="#69273b" wrapText="true">
+            <Label fx:id="message" alignment="TOP_CENTER" contentDisplay="CENTER" maxWidth="-Infinity" prefHeight="51.0" prefWidth="250.0" styleClass="error-message" stylesheets="@../global.css" text="Label" textAlignment="CENTER" textFill="#69273b" wrapText="true">
                <VBox.margin>
                   <Insets top="20.0" />
                </VBox.margin>
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
             </Label>
          </children>
       </VBox>

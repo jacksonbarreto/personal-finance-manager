@@ -31,7 +31,7 @@
          <font>
             <Font size="14.0" />
          </font></Button>
-      <TableView fx:id="table" focusTraversable="false" layoutX="96.0" layoutY="112.0" prefHeight="265.0" prefWidth="640.0" stylesheets="@../css/table.css" AnchorPane.bottomAnchor="80.0" AnchorPane.leftAnchor="80.0" AnchorPane.rightAnchor="80.0" AnchorPane.topAnchor="120.0">
+      <TableView fx:id="table" focusTraversable="false" layoutX="96.0" layoutY="112.0" prefHeight="265.0" prefWidth="640.0" stylesheets="@../css/table.css" AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="80.0" AnchorPane.rightAnchor="80.0" AnchorPane.topAnchor="120.0">
          <columns>
             <TableColumn fx:id="columnCategory" editable="false" prefWidth="330.0" sortable="false" />
          </columns>
