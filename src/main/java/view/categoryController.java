@@ -19,6 +19,7 @@ import java.net.URL;
 import java.util.Iterator;
 import java.util.ResourceBundle;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static bll.entities.MovementCategory.createPublicCategory;
 import static view.TextFieldUtilities.addTextLimiter;
@@ -112,7 +113,7 @@ public class categoryController implements Initializable {
 
     private void initializesItems() {
         this.items = FXCollections.observableArrayList();
-        this.items.addAll(MovementCategoryRepository.getInstance().getOnlyPublic());
+        this.items.addAll(MovementCategoryRepository.getInstance().getOnlyPublic().stream().sorted().collect(Collectors.toList()));
     }
 
     private void refreshItems() {
@@ -121,7 +122,7 @@ public class categoryController implements Initializable {
             it.next();
             it.remove();
         }
-        this.items.addAll(MovementCategoryRepository.getInstance().getOnlyPublic());
+        this.items.addAll(MovementCategoryRepository.getInstance().getOnlyPublic().stream().sorted().collect(Collectors.toList()));
         this.table.refresh();
     }
 

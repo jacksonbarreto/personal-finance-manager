@@ -12,8 +12,8 @@ module personal.finance.manager {
     requires org.kordamp.ikonli.core;
     requires org.kordamp.ikonli.javafx;
 
-    opens bll.entities to org.hibernate.orm.core;
-    opens dal.infra ;
+    opens bll.entities;
+    opens dal.infra;
     opens dal.converters to org.hibernate.orm.core;
     opens view;
     exports view;

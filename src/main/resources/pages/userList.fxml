@@ -13,7 +13,7 @@
 <?import javafx.scene.text.Font?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="450.0" prefWidth="800.0" style="-fx-background-color: #fff;" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.UserController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="460.0" prefWidth="800.0" style="-fx-background-color: #fff;" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.UserController">
    <children>
       <Label fx:id="screenTitle" layoutX="72.0" layoutY="59.0" text="Utilizadores" AnchorPane.leftAnchor="40.0" AnchorPane.topAnchor="40.0">
          <font>
@@ -37,8 +37,8 @@
             </Button>
          </children>
       </HBox>
-      <Pagination fx:id="pagination" layoutX="14.0" layoutY="210.0" maxPageIndicatorCount="5" pageCount="10" prefHeight="200.0" prefWidth="200.0" stylesheets="@../css/table.css" AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="80.0" AnchorPane.rightAnchor="80.0" AnchorPane.topAnchor="150.0" />
-      <StackPane fx:id="modal" prefHeight="150.0" prefWidth="200.0" styleClass="backdrop" stylesheets="@../global.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <Pagination fx:id="pagination" layoutX="14.0" layoutY="210.0" maxPageIndicatorCount="5" pageCount="10" prefHeight="200.0" prefWidth="200.0" stylesheets="@../css/table.css" AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="80.0" AnchorPane.rightAnchor="80.0" AnchorPane.topAnchor="140.0" />
+      <StackPane fx:id="modal" prefHeight="150.0" prefWidth="200.0" styleClass="backdrop" stylesheets="@../global.css" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
             <AnchorPane fx:id="resultModel" prefHeight="200.0" prefWidth="200.0" visible="false">
                <children>

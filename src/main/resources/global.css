@@ -21,17 +21,17 @@
 
 .default-button {
     -fx-background-color: #474787;
-    -fx-text-fill: #f7f1e3;
+    -fx-text-fill: #fff;
 }
 
 .default-button:hover {
     -fx-background-color: #276955;
-    -fx-text-fill: #f7f1e3;
+    -fx-text-fill: #fff;
 }
 
 .default-button:focused {
     -fx-background-color: #276955;
-    -fx-text-fill: #f7f1e3;
+    -fx-text-fill: #fff;
 }
 
 .close-button {
@@ -86,7 +86,7 @@
 
 .default-button {
     -fx-background-color: #276955;
-    -fx-text-fill: #f7f1e3;
+    -fx-text-fill: #fff;
     -fx-background-radius: 0px;
 }
 
@@ -127,12 +127,19 @@
     -fx-background-color: transparent;
     -fx-border-color: transparent transparent #41A58D transparent;
 }
+.search-button:hover{
+    -fx-background-color: #dfe4ea;
+    -fx-background-insets: 0;
+}
+.search-button-focused{
+    -fx-border-color: transparent transparent #33d9b2 transparent;
+}
 
 .check-box {
     /* default properties */
     selected-box-color: #16352C;
     box-color: #276955;
-    mark-color: #f7f1e3;
+    mark-color: #fff;
 
 }
 
@@ -154,13 +161,13 @@
 .check-box:hover > .box {
     /* background color for selected checkbox */
     -fx-background-color: #214F41;
-    -fx-border-color: #f7f1e3;
+    -fx-border-color: #fff;
 }
 
 .check-box:pressed > .box {
     /* background color for selected checkbox */
     -fx-background-color: #214339;
-    -fx-border-color: #f7f1e3;
+    -fx-border-color: #fff;
 }
 
 
@@ -178,6 +185,6 @@
 }
 
 .box-counter > .label{
-    -fx-text-fill: #f7f1e3;
+    -fx-text-fill: #fff;
 
 }

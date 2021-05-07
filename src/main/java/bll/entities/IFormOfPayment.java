@@ -8,7 +8,7 @@ import java.io.Serializable;
 import java.util.UUID;
 import java.util.function.Predicate;
 
-public interface IFormOfPayment extends Serializable {
+public interface IFormOfPayment extends Serializable, Comparable<IFormOfPayment> {
     int MINIMUM_NAME_SIZE = 3;
     int MAXIMUM_NAME_SIZE = 30;
     Predicate<String> INCORRECT_NAME_SIZE = (s) -> (s.length() < MINIMUM_NAME_SIZE || s.length() > MAXIMUM_NAME_SIZE);

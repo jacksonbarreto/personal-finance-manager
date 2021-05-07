@@ -9,7 +9,7 @@ import java.net.URI;
 import java.util.UUID;
 import java.util.function.Predicate;
 
-public interface IMovementCategory extends Serializable {
+public interface IMovementCategory extends Serializable, Comparable<IMovementCategory> {
 
     int MINIMUM_NAME_SIZE = 3;
     int MAXIMUM_NAME_SIZE = 30;

@@ -12,7 +12,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 
-public interface IUser extends Serializable {
+public interface IUser extends Serializable, Comparable<IUser> {
     int MINIMUM_NAME_SIZE = 3;
     int MAXIMUM_NAME_SIZE = 255;
     Predicate<String> INCORRECT_NAME_SIZE = (s) -> (s.length() < MINIMUM_NAME_SIZE || s.length() > MAXIMUM_NAME_SIZE);

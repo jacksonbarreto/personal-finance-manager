@@ -25,6 +25,7 @@ import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static bll.enumerators.ERole.*;
 
@@ -73,7 +74,7 @@ public class UserController implements Initializable {
 
     private ObservableList<IUser> itemsObservable;
     private IUser currentUser;
-    private final int rowsPerPAge = 5;
+    private final int rowsPerPAge = 4;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -82,6 +83,13 @@ public class UserController implements Initializable {
         initializesScreens();
         startTable();
         this.pagination.setPageFactory(this::createPage);
+
+        this.searchField.focusedProperty().addListener(((observableValue, aBoolean, t1) -> {
+            if (this.searchField.isFocused()){
+                this.searchButton.getStyleClass().add("search-button-focused");
+            } else
+                this.searchButton.getStyleClass().remove("search-button-focused");
+        }));
     }
 
 
@@ -103,15 +111,16 @@ public class UserController implements Initializable {
         TableColumn<IUser, HBox> ColumnButtons = new TableColumnButtonsFactory<IUser>("", buttonsFactory()).getColumn();
         columnName.setCellValueFactory(new PropertyValueFactory<>("name"));
         columnEmail.setCellValueFactory(edf -> new SimpleStringProperty(edf.getValue().getEmail().getEmail()));
-        //this.table.getColumns().addAll(columnName, columnEmail, ColumnButtons);
         this.table.getColumns().add(columnName);
         this.table.getColumns().add(columnEmail);
         this.table.getColumns().add(ColumnButtons);
         this.table.setRowFactory(new TableRowFactory<IUser>().getRowFactory());
         this.table.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/css/table.css")).toExternalForm());
-        columnName.setStyle("-fx-pref-width: 370px;");
+        columnName.setStyle("-fx-pref-width: 364px;");
         columnEmail.setStyle("-fx-pref-width: 220px;");
         this.table.setStyle("-fx-pref-width: 640px; -fx-min-width: 640px;");
+        this.table.setEditable(false);
+        this.table.getStyleClass().add("table-cell");
         ResourceBundle rb = ResourceBundle.getBundle("lang/messages");
         this.table.setPlaceholder(new Label(rb.getString("tableUsersEmpty")));
     }
@@ -134,7 +143,7 @@ public class UserController implements Initializable {
     }
 
     private void initializesItems() {
-        this.itemsObservable = FXCollections.observableList(new ArrayList<>(UserRepository.getInstance().getAll()));
+        this.itemsObservable = FXCollections.observableList(new ArrayList<>(UserRepository.getInstance().getAll().stream().sorted().collect(Collectors.toList())));
     }
 
     private void initializesScreens() {
@@ -187,7 +196,7 @@ public class UserController implements Initializable {
     public void search() {
         Predicate<IUser> predicate = u -> u.getCredential().getAccessKeys().stream().anyMatch(s -> s.matches("(?i).*" + this.searchField.getText() + ".*"));
         refreshItems();
-        this.itemsObservable.addAll(FXCollections.observableList(new ArrayList<>(UserRepository.getInstance().get(predicate))));
+        this.itemsObservable.addAll(FXCollections.observableList(new ArrayList<>(UserRepository.getInstance().get(predicate).stream().sorted().collect(Collectors.toList()))));
         this.pagination.setPageFactory(this::createPage);
     }
 

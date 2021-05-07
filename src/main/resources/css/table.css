@@ -112,9 +112,11 @@
 /*  Pagination  */
 
 .pagination > .pagination-control > .left-arrow, .right-arrow {
-    -fx-background-color: #f7f1e3;
+    -fx-background-color: #fff;
 }
-
+.pagination > .pagination-control > .right-arrow, .left-arrow {
+    -fx-background-color: #fff;
+}
 /* Actual button */
 .pagination > .pagination-control > .control-box > .number-button,
 .pagination > .pagination-control > .control-box > .bullet-button,
@@ -124,7 +126,7 @@
     -fx-background-color: #276955;
     -fx-min-width: 30;
     -fx-min-height: 30;
-    -fx-text-fill: #f7f1e3;
+    -fx-text-fill: #fff;
     -fx-background-radius: 0;
 }
 
@@ -135,7 +137,7 @@
 .pagination > .pagination-control > .control-box > .right-arrow-button:hover {
     -fx-background-insets: 0;
     -fx-background-color: #214F41;
-    -fx-text-fill: #f7f1e3;
+    -fx-text-fill: #fff;
 }
 
 /* Selected toggle color */
@@ -143,5 +145,5 @@
 .pagination > .pagination-control > .control-box > .bullet-button:selected {
     -fx-background-insets: 0;
     -fx-background-color: #16352C;
-    -fx-text-fill: #f7f1e3;
+    -fx-text-fill: #fff;
 }

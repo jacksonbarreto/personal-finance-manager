@@ -20,6 +20,7 @@ import java.net.URL;
 import java.util.Iterator;
 import java.util.ResourceBundle;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static bll.repositories.FormOfPaymentRepository.defaultFormOfPaymentRepository;
 import static view.TextFieldUtilities.addTextLimiter;
@@ -111,7 +112,7 @@ public class FormOfPaymentController implements Initializable {
 
     private void initializesItems() {
         this.items = FXCollections.observableArrayList();
-        this.items.addAll(defaultFormOfPaymentRepository().getAll());
+        this.items.addAll(defaultFormOfPaymentRepository().getAll().stream().sorted().collect(Collectors.toList()));
     }
 
     private void refreshItems() {
@@ -120,7 +121,7 @@ public class FormOfPaymentController implements Initializable {
             it.next();
             it.remove();
         }
-        this.items.addAll(defaultFormOfPaymentRepository().getAll());
+        this.items.addAll(defaultFormOfPaymentRepository().getAll().stream().sorted().collect(Collectors.toList()));
         this.table.refresh();
     }
 
