@@ -13,8 +13,18 @@
             <Font name="System Bold" size="18.0" />
          </font>
       </Label>
-      <HBox alignment="CENTER" layoutX="98.0" layoutY="216.0" prefHeight="143.0" prefWidth="603.0" spacing="20.0" stylesheets="@../global.css">
+      <HBox alignment="CENTER" layoutX="68.0" layoutY="215.0" prefHeight="143.0" prefWidth="662.0" spacing="20.0" stylesheets="@../global.css" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0">
          <children>
+            <VBox alignment="CENTER" prefHeight="200.0" prefWidth="160.0" styleClass="box-counter">
+               <children>
+                  <Label fx:id="totCount" alignment="CENTER" maxWidth="1.7976931348623157E308" text="5">
+                     <font>
+                        <Font name="System Bold" size="48.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="totLabel" alignment="CENTER" maxWidth="1.7976931348623157E308" prefHeight="18.0" prefWidth="120.0" text="Administradores" />
+               </children>
+            </VBox>
             <VBox alignment="CENTER" prefHeight="200.0" prefWidth="160.0" styleClass="box-counter">
                <children>
                   <Label fx:id="adminCount" alignment="CENTER" maxWidth="1.7976931348623157E308" text="5">

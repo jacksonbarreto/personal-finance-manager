@@ -20,6 +20,12 @@ public class HomeController implements Initializable {
     private Label screenTitle;
 
     @FXML
+    private Label totCount;
+
+    @FXML
+    private Label totLabel;
+
+    @FXML
     private Label adminCount;
 
     @FXML
@@ -60,6 +66,7 @@ public class HomeController implements Initializable {
         this.adminLabel.setText(rb.getString("adminLabel.home"));
         this.simpleLabel.setText(rb.getString("simpleLabel.home"));
         this.premiumLabel.setText(rb.getString("premiumLabel.home"));
+        this.totLabel.setText(rb.getString("totLabel.home"));
     }
 
     private void loadData() {
@@ -69,5 +76,6 @@ public class HomeController implements Initializable {
         this.adminCount.setText(Long.toString(users.stream().filter(u -> u.getRoles().contains(ADMIN)).count()));
         this.premiumCount.setText(Long.toString(users.stream().filter(u -> u.getRoles().contains(PREMIUM)).count()));
         this.simpleCount.setText(Long.toString(users.stream().filter(u -> u.getRoles().contains(SIMPLE)).count()));
+        this.totCount.setText(Long.toString(users.size()));
     }
 }
