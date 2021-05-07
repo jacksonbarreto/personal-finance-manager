@@ -5,6 +5,7 @@ import bll.exceptions.AccessDeniedUnconfirmedEmailException;
 import bll.services.AuthenticationService;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
@@ -28,9 +29,34 @@ public class MainController implements Initializable {
     @FXML
     private Pane minimizeButton;
 
+    @FXML
+    private Label keyLabel;
+
+    @FXML
+    private Label passLabel;
+
+    @FXML
+    private Button loginButton;
+
+    @FXML
+    private Label titleScreen;
+
+    @FXML
+    private Label slogan;
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         message.setVisible(false);
+        loadLanguage();
+    }
+
+    private void loadLanguage() {
+        ResourceBundle rb = ResourceBundle.getBundle("lang/messages");
+        this.keyLabel.setText(rb.getString("keyLabel.login"));
+        this.passLabel.setText(rb.getString("passLabel.login"));
+        this.loginButton.setText(rb.getString("loginButton.login"));
+        this.titleScreen.setText(rb.getString("titleScreen.login"));
+        this.slogan.setText(rb.getString("slogan.login"));
     }
 
     public void passwordPressed(KeyEvent e) {
@@ -40,6 +66,7 @@ public class MainController implements Initializable {
 
     public void login() {
         message.setVisible(false);
+        ResourceBundle rb = ResourceBundle.getBundle("lang/errors");
         resetFieldStyle();
         if (validFields()) {
             try {
@@ -52,12 +79,12 @@ public class MainController implements Initializable {
                         e.printStackTrace();
                     }
                 } else {
-                    message.setText("Chave de acesso ou senha inválidos. Tente novamente.");
+                    message.setText(rb.getString("invalid.data.login"));
                 }
             } catch (AccessDeniedBlockedUserException e) {
-                message.setText("Utilizador bloqueado. Clique em: Esqueceu sua senha?, para recuperar o acesso.");
+                message.setText(rb.getString("blocked.user.login"));
             } catch (AccessDeniedUnconfirmedEmailException e) {
-                message.setText("Ative a sua conta através do e-mail de confirmação enviado.");
+                message.setText(rb.getString("inactive.login"));
             } finally {
                 message.setVisible(true);
             }
@@ -75,17 +102,18 @@ public class MainController implements Initializable {
 
 
     private boolean validFields() {
+        ResourceBundle rb = ResourceBundle.getBundle("lang/errors");
         if (password.getText().isEmpty() || accessKey.getText().isEmpty()) {
             String alert;
             if (password.getText().isEmpty() && accessKey.getText().isEmpty()) {
-                alert = "A chave de acesso e a senha devem ser preenchidos.";
+                alert = rb.getString("fill.pass.key.login");
                 password.getStyleClass().add("default-field-error");
                 accessKey.getStyleClass().add("default-field-error");
             } else if (password.getText().isEmpty()) {
-                alert = "A senha deve ser preenchida.";
+                alert = rb.getString("fill.pass.login");
                 password.getStyleClass().add("default-field-error");
             } else {
-                alert = "A chave de acesso deve ser preenchida";
+                alert = rb.getString("fill.key.login");
                 accessKey.getStyleClass().add("default-field-error");
             }
             message.setText(alert);
