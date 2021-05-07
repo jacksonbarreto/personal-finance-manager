@@ -32,6 +32,18 @@ public class DashboardController implements Initializable {
     @FXML
     private Button home;
 
+    @FXML
+    private Button userList;
+
+    @FXML
+    private Button formOfPayment;
+
+    @FXML
+    private Button category;
+
+    @FXML
+    private Button account;
+
     private Set<Button> menuButtons;
 
     private Timeline timeline;
@@ -50,9 +62,19 @@ public class DashboardController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         this.home.getStyleClass().add("menu-button-selected");
         loadScreenInCenter(DashboardController.class, "home", this.dashboard);
+        loadLanguage();
         this.menuButtons = new HashSet<>();
         this.menuButtons.add(home);
         autoClose();
+    }
+
+    private void loadLanguage() {
+        ResourceBundle rb = ResourceBundle.getBundle("lang/messages");
+        this.home.setText(rb.getString("homeButton.dashboard"));
+        this.userList.setText(rb.getString("userList.dashboard"));
+        this.formOfPayment.setText(rb.getString("formOfPayment.dashboard"));
+        this.category.setText(rb.getString("category.dashboard"));
+        this.account.setText(rb.getString("account.dashboard"));
     }
 
     private void autoClose() {
